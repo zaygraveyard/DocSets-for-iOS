@@ -24,7 +24,7 @@
 			<key>title</key>
 			<string>iOS 4.2 Library</string>
 			<key>name</key>
-			<string>com.apple.adc.documentation.AppleiOS4_2.iOSLibrary.Xcode4.docset</string>
+			<string>com.apple.adc.documentation.AppleiOS4_2.iOSLibrary.docset</string>
 			<key>URL</key>
 			<string>http://devimages.apple.com/docsets/20101122/com.apple.adc.documentation.AppleiOS4_2.iOSLibrary.Xcode4.xar</string>
 		</dict>
