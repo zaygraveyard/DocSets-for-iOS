@@ -276,8 +276,12 @@
 		BookmarksViewController *vc = [[BookmarksViewController alloc] initWithDocSet:self.docSet];
 		vc.detailViewController = self;
 		UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:vc];
-		bookmarksPopover = [[UIPopoverController alloc] initWithContentViewController:navController];
-		[bookmarksPopover presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
+		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+			bookmarksPopover = [[UIPopoverController alloc] initWithContentViewController:navController];
+			[bookmarksPopover presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
+		} else {
+			[self presentModalViewController:navController animated:YES];
+		}
 	}
 }
 
@@ -366,7 +370,11 @@
 - (void)showBookmark:(NSDictionary *)bookmark
 {
 	[self openURL:[NSURL URLWithString:[bookmark objectForKey:@"URL"]] withAnchor:nil];
-	[bookmarksPopover dismissPopoverAnimated:YES];
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+		[bookmarksPopover dismissPopoverAnimated:YES];
+	} else {
+		[self dismissModalViewControllerAnimated:YES];
+	}
 }
 
 - (void)openURL:(NSURL *)URL withAnchor:(NSString *)anchor
