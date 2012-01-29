@@ -8,7 +8,8 @@
 
 #import "SwipeSplitViewController.h"
 
-#define MASTER_VIEW_WIDTH	384.0
+#define MASTER_VIEW_WIDTH_PORTRAIT		384.0
+#define MASTER_VIEW_WIDTH_LANDSCAPE		320.0
 
 @interface SwipeSplitViewController ()
 
@@ -57,6 +58,7 @@
 	
 	[self.view addSubview:self.detailViewController.view];
 	self.masterViewController.view.frame = CGRectInset(_masterContainerView.bounds, 3, 3);
+	//self.masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	[_masterContainerView addSubview:self.masterViewController.view];
 	[self.view addSubview:_masterContainerView];
 	
@@ -93,14 +95,14 @@
 	CGRect masterFrame;
 	CGRect detailFrame;
 	if (UIInterfaceOrientationIsPortrait(self.interfaceOrientation)) {
-		masterFrame = CGRectMake(-MASTER_VIEW_WIDTH, 0, MASTER_VIEW_WIDTH, boundsSize.height);
+		masterFrame = CGRectMake(-MASTER_VIEW_WIDTH_PORTRAIT, 0, MASTER_VIEW_WIDTH_PORTRAIT, boundsSize.height);
 		detailFrame = self.view.bounds;
 	} else {
-		masterFrame = CGRectMake(0, 0, MASTER_VIEW_WIDTH, boundsSize.height);
-		detailFrame = CGRectMake(MASTER_VIEW_WIDTH + 1, 0, boundsSize.width - MASTER_VIEW_WIDTH - 1, boundsSize.height);
+		masterFrame = CGRectMake(0, 0, MASTER_VIEW_WIDTH_LANDSCAPE, boundsSize.height);
+		detailFrame = CGRectMake(MASTER_VIEW_WIDTH_LANDSCAPE + 1, 0, boundsSize.width - MASTER_VIEW_WIDTH_LANDSCAPE - 1, boundsSize.height);
 	}
 	self.masterContainerView.frame = CGRectInset(masterFrame, -3, -3);
-	//self.masterContainerView.image = nil;
+	self.masterViewController.view.frame = CGRectInset(self.masterContainerView.bounds, 3, 3);
 	
 	self.detailViewController.view.frame = detailFrame;
 }
@@ -125,7 +127,7 @@
 	[self.masterViewController viewWillAppear:animated];
 	
 	CGSize boundsSize = self.view.bounds.size;
-	CGRect masterFrame = CGRectMake(0, 0, MASTER_VIEW_WIDTH, boundsSize.height);
+	CGRect masterFrame = CGRectMake(0, 0, MASTER_VIEW_WIDTH_PORTRAIT, boundsSize.height);
 	
 	self.masterContainerView.image = [UIImage imageNamed:@"Shadow.png"];
 	
