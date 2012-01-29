@@ -192,14 +192,14 @@
 
 - (UITableViewCell *)tableView:(UITableView *)aTableView cellForRowAtIndexPath:(NSIndexPath *)indexPath 
 {
-	static NSString *CellIdentifier = @"Cell";
-	UITableViewCell *cell = [aTableView dequeueReusableCellWithIdentifier:CellIdentifier];
-	if (cell == nil) {
-		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
-		cell.textLabel.font = [UIFont boldSystemFontOfSize:15.0];
-	}
-	
 	if (aTableView == self.tableView) {
+		static NSString *CellIdentifier = @"Cell";
+		UITableViewCell *cell = [aTableView dequeueReusableCellWithIdentifier:CellIdentifier];
+		if (cell == nil) {
+			cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
+			cell.textLabel.font = [UIFont boldSystemFontOfSize:15.0];
+		}
+			
 		NSDictionary *nodeSection = [nodeSections objectAtIndex:indexPath.section];
 		NSManagedObject *node = [[nodeSection objectForKey:kNodeSectionNodes] objectAtIndex:indexPath.row];
 		
@@ -230,7 +230,15 @@
 		cell.accessoryView = nil;
 		return cell;
 	} else if (aTableView == self.searchDisplayController.searchResultsTableView) {
+		static NSString *searchCellIdentifier = @"SearchResultCell";
+		SearchResultCell *cell = (SearchResultCell *)[aTableView dequeueReusableCellWithIdentifier:searchCellIdentifier];
+		if (cell == nil) {
+			cell = [[SearchResultCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:searchCellIdentifier];
+			cell.textLabel.font = [UIFont boldSystemFontOfSize:15.0];
+		}
+		
 		if (!self.searchResults) {
+			cell.searchTerm = nil;
 			cell.textLabel.text = NSLocalizedString(@"Searching...", nil);
 			cell.textLabel.textColor = [UIColor grayColor];
 			cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -239,11 +247,17 @@
 			[spinner startAnimating];
 			cell.accessoryView = spinner;
 		} else {
+			cell.searchTerm = self.searchDisplayController.searchBar.text;
 			cell.textLabel.textColor = [UIColor blackColor];
 			cell.selectionStyle = UITableViewCellSelectionStyleBlue;
 			cell.accessoryView = nil;
 			NSDictionary *result = [searchResults objectAtIndex:indexPath.row];
+			
 			if ([result objectForKey:@"tokenType"]) {
+				NSManagedObject *metaInfo = [docSet.managedObjectContext existingObjectWithID:[result objectForKey:@"metainformation"] error:NULL];
+				NSSet *deprecatedVersions = [metaInfo valueForKey:@"deprecatedInVersions"];
+				cell.deprecated = ([deprecatedVersions count] > 0);
+				
 				NSManagedObjectID *tokenTypeID = [result objectForKey:@"tokenType"];
 				if (tokenTypeID) {
 					NSManagedObject *tokenType = [[docSet managedObjectContext] existingObjectWithID:tokenTypeID error:NULL];
@@ -266,6 +280,7 @@
 				cell.textLabel.text = [result objectForKey:@"tokenName"];
 				cell.accessoryType = UITableViewCellAccessoryNone;
 			} else {
+				cell.deprecated = NO;
 				cell.textLabel.text = [result objectForKey:@"kName"];
 				NSManagedObjectID *objectID = [result objectForKey:@"objectID"];
 				
@@ -285,7 +300,6 @@
 					cell.imageView.image = nil;
 				}
 				cell.detailTextLabel.text = nil;
-			
 			}
 		}
 		return cell;
@@ -352,3 +366,70 @@
 
 @end
 
+
+
+@implementation SearchResultCell
+
+@synthesize searchTerm, deprecated;
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
+{
+	self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+	if (self) {
+		highlightView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+		highlightView.backgroundColor = [UIColor colorWithRed:0.922 green:0.910 blue:0.745 alpha:1.0];
+		UIView *underlineView = [[UIView alloc] initWithFrame:CGRectMake(0, 9, 10, 1)];
+		underlineView.backgroundColor = [UIColor colorWithRed:0.929 green:0.792 blue:0.149 alpha:1.0];
+		underlineView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+		[highlightView addSubview:underlineView];
+		highlightView.hidden = YES;
+		[self.contentView insertSubview:highlightView belowSubview:self.textLabel];
+	}
+	return self;
+}
+
+- (void)setDeprecated:(BOOL)deprecatedFlag
+{
+	deprecated = deprecatedFlag;
+	if (deprecated) {
+		if (!strikeThroughView) {
+			strikeThroughView = [[UIView alloc] initWithFrame:CGRectZero];
+			strikeThroughView.backgroundColor = [UIColor redColor];
+			[self.contentView addSubview:strikeThroughView];
+		}
+	} else {
+		if (strikeThroughView) {
+			[strikeThroughView removeFromSuperview];
+			strikeThroughView = nil;
+		}
+	}
+}
+
+- (void)layoutSubviews
+{
+	[super layoutSubviews];
+	
+	if (searchTerm.length > 0) {
+		NSRange searchTermRange = [self.textLabel.text rangeOfString:searchTerm options:NSCaseInsensitiveSearch];
+		if (searchTermRange.location != NSNotFound) {
+			UIFont *font = self.textLabel.font;
+			CGSize searchTermSize = [searchTerm sizeWithFont:font]; 
+			NSString *prefix = [self.textLabel.text substringToIndex:searchTermRange.location];
+			CGSize prefixSize = [prefix sizeWithFont:font];
+			CGRect highlightRect = CGRectMake(self.textLabel.frame.origin.x + prefixSize.width, self.textLabel.frame.origin.y, searchTermSize.width, self.textLabel.frame.size.height);
+			self.textLabel.backgroundColor = [UIColor clearColor];
+			highlightView.frame = highlightRect;
+			highlightView.hidden = NO;
+		} else {
+			highlightView.hidden = YES;
+		}
+	} else {
+		highlightView.hidden = YES;
+	}
+	if (deprecated) {
+		CGRect textLabelFrame = self.textLabel.frame;
+		strikeThroughView.frame = CGRectMake(textLabelFrame.origin.x, CGRectGetMidY(textLabelFrame), textLabelFrame.size.width, 1);
+	}
+}
+
+@end

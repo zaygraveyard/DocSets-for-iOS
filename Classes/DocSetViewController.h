@@ -29,3 +29,18 @@
 - (id)initWithDocSet:(DocSet *)set rootNode:(NSManagedObject *)rootNode;
 
 @end
+
+
+
+@interface SearchResultCell : UITableViewCell {
+	
+	NSString *searchTerm;
+	BOOL deprecated;
+	UIView *highlightView;
+	UIView *strikeThroughView;
+}
+
+@property (nonatomic, retain) NSString *searchTerm;
+@property (nonatomic, assign) BOOL deprecated;
+
+@end
