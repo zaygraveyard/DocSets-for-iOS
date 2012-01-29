@@ -79,9 +79,15 @@
 	titleLabel.backgroundColor = [UIColor clearColor];
 	titleLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
 	
-	CGFloat topToolbarHeight = 0.0;
+	CGFloat topToolbarHeight = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) ? 44.0 : 0.0;
+	webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, topToolbarHeight, self.view.bounds.size.width, self.view.bounds.size.height - topToolbarHeight)];
+	webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+	webView.scalesPageToFit = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad);
+	
+	webView.delegate = self;
+	[self.view addSubview:webView];
+	
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-		topToolbarHeight = 44.0;
 		toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, topToolbarHeight)];
 		toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
 		toolbar.items = UIInterfaceOrientationIsPortrait(self.interfaceOrientation) ? portraitToolbarItems : landscapeToolbarItems;
@@ -95,12 +101,6 @@
 		self.toolbarItems = [NSArray arrayWithObjects:bookmarksButtonItem, flexSpace, backButtonItem, spaceItem, forwardButtonItem, flexSpace, actionButtonItem, nil];
 		self.navigationItem.rightBarButtonItem = outlineButtonItem;
 	}
-	webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, topToolbarHeight, self.view.bounds.size.width, self.view.bounds.size.height - topToolbarHeight)];
-	webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-	webView.scalesPageToFit = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad);
-	
-	webView.delegate = self;
-	[self.view addSubview:webView];
 	
 	coverView = [[UIView alloc] initWithFrame:webView.frame];
 	coverView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"whitey.png"]];
