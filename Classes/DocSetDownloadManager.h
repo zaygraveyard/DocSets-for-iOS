@@ -58,6 +58,7 @@ typedef enum DocSetDownloadStatus {
 	
 	DocSetDownloadStatus _status;
 	float _progress;
+    BOOL _shouldCancelExtracting;
 	NSUInteger bytesDownloaded;
 	NSInteger downloadSize;
 }
@@ -69,6 +70,7 @@ typedef enum DocSetDownloadStatus {
 @property (nonatomic, strong) NSString *extractedPath;
 @property (nonatomic, assign) DocSetDownloadStatus status;
 @property (nonatomic, assign) float progress;
+@property (atomic, assign) BOOL shouldCancelExtracting; // must be atomic
 @property (readonly) NSUInteger bytesDownloaded;
 @property (readonly) NSInteger downloadSize;
 

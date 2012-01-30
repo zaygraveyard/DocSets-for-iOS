@@ -178,7 +178,7 @@
 
 @implementation DocSetDownload
 
-@synthesize connection=_connection, URL=_URL, fileHandle=_fileHandle, downloadTargetPath=_downloadTargetPath, extractedPath=_extractedPath, progress=_progress, status=_status;
+@synthesize connection=_connection, URL=_URL, fileHandle=_fileHandle, downloadTargetPath=_downloadTargetPath, extractedPath=_extractedPath, progress=_progress, status=_status, shouldCancelExtracting = _shouldCancelExtracting;
 @synthesize downloadSize, bytesDownloaded;
 
 - (id)initWithURL:(NSURL *)URL
@@ -271,6 +271,11 @@
 			xar_file_t f = xar_file_first(x, i);
 			NSInteger filesExtracted = 0;
 			do {
+                if (self.shouldCancelExtracting) {
+                    NSLog(@"Extracting cancelled");
+                    break;
+                }
+                
 				if (f) {				
 					const char *name = NULL;
 					xar_prop_get(f, "name", &name);
@@ -288,6 +293,12 @@
 				}
 			} while (f != NULL);
 			xar_iter_free(i);
+            
+            if (self.shouldCancelExtracting) {
+                // Cleanup: delete all files that have already been extracted
+                NSFileManager *fm = [[NSFileManager alloc] init];
+                [fm removeItemAtPath:extractionTargetPath error:NULL];
+            }
 		}
 		xar_close(x);
 		
