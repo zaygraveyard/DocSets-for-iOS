@@ -84,8 +84,8 @@
 		[[NSNotificationCenter defaultCenter] postNotificationName:DocSetDownloadFinishedNotification object:download];
 		[self startNextDownload];
 	} else if (download.status == DocSetDownloadStatusExtracting) {
-        download.shouldCancelExtracting = YES;
-    }
+		download.shouldCancelExtracting = YES;
+	}
 }
 
 - (void)downloadDocSetAtURL:(NSString *)URL
@@ -216,6 +216,9 @@
 	if (self.status == DocSetDownloadStatusDownloading) {
 		[self.connection cancel];
 		self.status = DocSetDownloadStatusFinished;
+		if (_backgroundTask != UIBackgroundTaskInvalid) {
+			[[UIApplication sharedApplication] endBackgroundTask:_backgroundTask];
+		}
 	}
 }
 
@@ -273,11 +276,10 @@
 			xar_file_t f = xar_file_first(x, i);
 			NSInteger filesExtracted = 0;
 			do {
-                if (self.shouldCancelExtracting) {
-                    NSLog(@"Extracting cancelled");
-                    break;
-                }
-                
+				if (self.shouldCancelExtracting) {
+					NSLog(@"Extracting cancelled");
+					break;
+				}
 				if (f) {				
 					const char *name = NULL;
 					xar_prop_get(f, "name", &name);
