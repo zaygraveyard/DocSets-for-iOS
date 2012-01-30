@@ -137,19 +137,42 @@
 
 @implementation DownloadCell
 
-@synthesize downloadInfo=_downloadInfo, download=_download, progressView=_progressView;
+@synthesize downloadInfo=_downloadInfo, download=_download, downloadInfoView=_downloadInfoView, progressView=_progressView, cancelDownloadButton=_cancelDownloadButton;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
 	self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
 	if (self) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(downloadStarted:) name:DocSetDownloadManagerStartedDownloadNotification object:nil];
-		_progressView = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
-		CGRect pFrame = _progressView.frame;
-		pFrame.size.width = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) ? 120 : 70;
-		_progressView.frame = pFrame;
+        [self setupDownloadInfoView];
 	}
 	return self;
+}
+
+- (void)setupDownloadInfoView
+{
+    CGFloat progressViewWidth = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) ? 120 : 70;
+    CGFloat cancelButtonWidth = 30;
+    CGFloat cancelButtonHeight = 29;
+    CGFloat margin = 10;
+    CGFloat downloadInfoViewWidth = progressViewWidth + margin + cancelButtonWidth;
+    
+    _progressView = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
+    CGRect pFrame = _progressView.frame;
+    pFrame.origin.y = floorf((cancelButtonHeight - pFrame.size.height) / 2.0);
+    pFrame.size.width = progressViewWidth;
+    _progressView.frame = pFrame;
+    
+    _cancelDownloadButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _cancelDownloadButton.frame = CGRectMake(progressViewWidth + margin, 0, cancelButtonWidth, cancelButtonHeight);
+    [_cancelDownloadButton setImage:[UIImage imageNamed:@"Cancel.png"] forState:UIControlStateNormal];
+    [_cancelDownloadButton setImage:[UIImage imageNamed:@"Cancel-Pressed.png"] forState:UIControlStateHighlighted];
+    [_cancelDownloadButton setImage:[UIImage imageNamed:@"Cancel-Pressed.png"] forState:UIControlStateSelected];
+    [_cancelDownloadButton addTarget:self action:@selector(cancelDownload:) forControlEvents:UIControlEventTouchUpInside];
+    
+    _downloadInfoView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, downloadInfoViewWidth, cancelButtonHeight)];
+    [_downloadInfoView addSubview:_progressView];
+    [_downloadInfoView addSubview:_cancelDownloadButton];
 }
 
 - (void)downloadStarted:(NSNotification *)notification
@@ -198,7 +221,7 @@
 	
 	if (_download) {
 		self.progressView.progress = self.download.progress;
-		self.accessoryView = self.progressView;
+		self.accessoryView = self.downloadInfoView;
 	} else {
 		self.accessoryView = nil;
 	}
@@ -245,6 +268,11 @@
 	} else if ([keyPath isEqualToString:@"status"]) {
 		[self updateStatusLabel];
 	}
+}
+
+- (void)cancelDownload:(id)sender
+{
+    [[DocSetDownloadManager sharedDownloadManager] stopDownload:self.download];
 }
 
 - (void)dealloc

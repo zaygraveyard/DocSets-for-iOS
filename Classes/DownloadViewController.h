@@ -19,13 +19,19 @@
 @interface DownloadCell : UITableViewCell {
 	NSDictionary *_downloadInfo;
 	DocSetDownload *_download;
+    UIView *_downloadInfoView;
 	UIProgressView *_progressView;
+    UIButton *_cancelDownloadButton;
 }
 
 @property (nonatomic, strong) NSDictionary *downloadInfo;
 @property (nonatomic, strong) DocSetDownload *download;
+@property (nonatomic, strong) UIView *downloadInfoView;
 @property (nonatomic, strong) UIProgressView *progressView;
+@property (nonatomic, strong) UIButton *cancelDownloadButton;
 
+- (void)setupDownloadInfoView;
 - (void)updateStatusLabel;
+- (void)cancelDownload:(id)sender;
 
 @end
