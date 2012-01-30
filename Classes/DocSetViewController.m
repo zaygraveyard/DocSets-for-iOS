@@ -246,6 +246,7 @@
 			UIActivityIndicatorView *spinner = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
 			[spinner startAnimating];
 			cell.accessoryView = spinner;
+			cell.detailTextLabel.text = nil;
 		} else {
 			cell.searchTerm = self.searchDisplayController.searchBar.text;
 			cell.textLabel.textColor = [UIColor blackColor];
