@@ -108,7 +108,7 @@
 	DocSetDownload *download = [[DocSetDownloadManager sharedDownloadManager] downloadForURL:[downloadInfo objectForKey:@"URL"]];
 	if (!download) {
 		return NO;
-	} else if (download.status == DocSetDownloadStatusDownloading || download.status == DocSetDownloadStatusWaiting) {
+	} else if (download.status == DocSetDownloadStatusDownloading || download.status == DocSetDownloadStatusWaiting || download.status == DocSetDownloadStatusExtracting) {
 		return YES;
 	}
 	return NO;

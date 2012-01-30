@@ -83,7 +83,9 @@
 		[_downloadsByURL removeObjectForKey:[download.URL absoluteString]];
 		[[NSNotificationCenter defaultCenter] postNotificationName:DocSetDownloadFinishedNotification object:download];
 		[self startNextDownload];
-	}
+	} else if (download.status == DocSetDownloadStatusExtracting) {
+        download.shouldCancelExtracting = YES;
+    }
 }
 
 - (void)downloadDocSetAtURL:(NSString *)URL
