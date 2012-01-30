@@ -34,6 +34,7 @@
 - (void)downloadDocSetAtURL:(NSString *)URL;
 - (void)deleteDocSet:(DocSet *)docSetToDelete;
 - (DocSetDownload *)downloadForURL:(NSString *)URL;
+- (void)stopDownload:(DocSetDownload *)download;
 - (DocSet *)downloadedDocSetWithName:(NSString *)docSetName;
 
 @end
@@ -73,6 +74,7 @@ typedef enum DocSetDownloadStatus {
 
 - (id)initWithURL:(NSURL *)URL;
 - (void)start;
+- (void)cancel;
 - (void)fail;
 
 @end

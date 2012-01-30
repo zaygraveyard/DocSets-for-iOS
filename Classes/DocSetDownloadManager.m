@@ -70,6 +70,21 @@
 	return [_downloadsByURL objectForKey:URL];
 }
 
+- (void)stopDownload:(DocSetDownload *)download
+{
+	if (download.status == DocSetDownloadStatusWaiting) {
+		[_downloadQueue removeObject:download];
+		[_downloadsByURL removeObjectForKey:[download.URL absoluteString]];
+		[[NSNotificationCenter defaultCenter] postNotificationName:DocSetDownloadFinishedNotification object:download];
+	} else if (download.status == DocSetDownloadStatusDownloading) {
+		[download cancel];
+		self.currentDownload = nil;
+		[_downloadsByURL removeObjectForKey:[download.URL absoluteString]];
+		[[NSNotificationCenter defaultCenter] postNotificationName:DocSetDownloadFinishedNotification object:download];
+		[self startNextDownload];
+	}
+}
+
 - (void)downloadDocSetAtURL:(NSString *)URL
 {
 	if ([_downloadsByURL objectForKey:URL]) {
@@ -189,6 +204,14 @@
 	
 	bytesDownloaded = 0;
 	self.connection = [NSURLConnection connectionWithRequest:[NSURLRequest requestWithURL:self.URL] delegate:self];
+}
+
+- (void)cancel
+{
+	if (self.status == DocSetDownloadStatusDownloading) {
+		[self.connection cancel];
+		self.status = DocSetDownloadStatusFinished;
+	}
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response

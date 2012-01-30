@@ -97,6 +97,35 @@
 	}
 }
 
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+	NSDictionary *downloadInfo = [[[DocSetDownloadManager sharedDownloadManager] availableDownloads] objectAtIndex:indexPath.row];
+	NSString *name = [downloadInfo objectForKey:@"name"];
+	BOOL downloaded = [[[DocSetDownloadManager sharedDownloadManager] downloadedDocSetNames] containsObject:name];
+	if (downloaded) {
+		return NO;
+	}
+	DocSetDownload *download = [[DocSetDownloadManager sharedDownloadManager] downloadForURL:[downloadInfo objectForKey:@"URL"]];
+	if (!download) {
+		return NO;
+	} else if (download.status == DocSetDownloadStatusDownloading || download.status == DocSetDownloadStatusWaiting) {
+		return YES;
+	}
+	return NO;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+	return NSLocalizedString(@"Stop", nil);
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+	NSDictionary *downloadInfo = [[[DocSetDownloadManager sharedDownloadManager] availableDownloads] objectAtIndex:indexPath.row];
+	DocSetDownload *download = [[DocSetDownloadManager sharedDownloadManager] downloadForURL:[downloadInfo objectForKey:@"URL"]];
+	[[DocSetDownloadManager sharedDownloadManager] stopDownload:download];
+}
+
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
