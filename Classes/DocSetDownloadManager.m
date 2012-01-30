@@ -9,6 +9,7 @@
 #import "DocSetDownloadManager.h"
 #import "DocSet.h"
 #import "xar.h"
+#include <sys/xattr.h>
 
 @interface DocSetDownloadManager ()
 
@@ -145,6 +146,8 @@
 			NSString *targetPath = [docPath stringByAppendingPathComponent:file];
 			[[NSFileManager defaultManager] moveItemAtPath:fullPath toPath:targetPath error:NULL];
 			NSLog(@"Moved downloaded docset to %@", targetPath);
+			u_int8_t b = 1;
+			setxattr([targetPath fileSystemRepresentation], "com.apple.MobileBackup", &b, 1, 0, 0);
 		}
 	}
 	
