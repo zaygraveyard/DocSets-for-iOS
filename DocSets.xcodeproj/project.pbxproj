@@ -685,7 +685,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					"OtherSources/lib/include/**",
-					"/usr/include/libxml2/**",
+					"${SDKROOT}/usr/include/libxml2/**",
 				);
 				INFOPLIST_FILE = Resources/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
@@ -709,7 +709,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					"OtherSources/lib/include/**",
-					"/usr/include/libxml2/**",
+					"${SDKROOT}/usr/include/libxml2/**",
 				);
 				INFOPLIST_FILE = Resources/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
@@ -748,7 +748,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
 					"OtherSources/lib/include/**",
-					"/usr/include/libxml2/**",
+					"${SDKROOT}/usr/include/libxml2/**",
 				);
 				INFOPLIST_FILE = Resources/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
