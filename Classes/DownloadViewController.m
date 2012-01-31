@@ -97,35 +97,6 @@
 	}
 }
 
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
-	NSDictionary *downloadInfo = [[[DocSetDownloadManager sharedDownloadManager] availableDownloads] objectAtIndex:indexPath.row];
-	NSString *name = [downloadInfo objectForKey:@"name"];
-	BOOL downloaded = [[[DocSetDownloadManager sharedDownloadManager] downloadedDocSetNames] containsObject:name];
-	if (downloaded) {
-		return NO;
-	}
-	DocSetDownload *download = [[DocSetDownloadManager sharedDownloadManager] downloadForURL:[downloadInfo objectForKey:@"URL"]];
-	if (!download) {
-		return NO;
-	} else if (download.status == DocSetDownloadStatusDownloading || download.status == DocSetDownloadStatusWaiting || download.status == DocSetDownloadStatusExtracting) {
-		return YES;
-	}
-	return NO;
-}
-
-- (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-	return NSLocalizedString(@"Stop", nil);
-}
-
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-	NSDictionary *downloadInfo = [[[DocSetDownloadManager sharedDownloadManager] availableDownloads] objectAtIndex:indexPath.row];
-	DocSetDownload *download = [[DocSetDownloadManager sharedDownloadManager] downloadForURL:[downloadInfo objectForKey:@"URL"]];
-	[[DocSetDownloadManager sharedDownloadManager] stopDownload:download];
-}
-
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -137,19 +108,50 @@
 
 @implementation DownloadCell
 
-@synthesize downloadInfo=_downloadInfo, download=_download, progressView=_progressView;
+@synthesize downloadInfo=_downloadInfo, download=_download, downloadInfoView=_downloadInfoView, progressView=_progressView, cancelDownloadButton=_cancelDownloadButton;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
 	self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
 	if (self) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(downloadStarted:) name:DocSetDownloadManagerStartedDownloadNotification object:nil];
-		_progressView = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
-		CGRect pFrame = _progressView.frame;
-		pFrame.size.width = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) ? 120 : 70;
-		_progressView.frame = pFrame;
+		[self setupDownloadInfoView];
+		
 	}
 	return self;
+}
+
+- (void)setupDownloadInfoView
+{
+    CGFloat progressViewWidth = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) ? 120 : 70;
+    CGFloat cancelButtonWidth = 30;
+    CGFloat cancelButtonHeight = 29;
+    CGFloat margin = 10;
+    
+    _progressView = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
+	
+    _cancelDownloadButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    _cancelDownloadButton.frame = CGRectMake(progressViewWidth + margin, 0, cancelButtonWidth, cancelButtonHeight);
+    [_cancelDownloadButton setImage:[UIImage imageNamed:@"Cancel.png"] forState:UIControlStateNormal];
+    [_cancelDownloadButton setImage:[UIImage imageNamed:@"Cancel-Pressed.png"] forState:UIControlStateHighlighted];
+    [_cancelDownloadButton setImage:[UIImage imageNamed:@"Cancel-Pressed.png"] forState:UIControlStateSelected];
+    [_cancelDownloadButton addTarget:self action:@selector(cancelDownload:) forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (void)layoutSubviews
+{
+	[super layoutSubviews];
+	if (!self.download) {
+		return;
+	}
+	DocSetDownloadStatus status = self.download.status;
+	if (status == DocSetDownloadStatusWaiting || status == DocSetDownloadStatusDownloading || status == DocSetDownloadStatusExtracting) {	
+		self.progressView.frame = CGRectMake(60, CGRectGetMidY(self.contentView.bounds) - self.progressView.bounds.size.height * 0.5, CGRectGetWidth(self.contentView.bounds) - 70, self.progressView.frame.size.height);
+		CGRect textLabelFrame = self.textLabel.frame;
+		self.textLabel.frame = CGRectMake(textLabelFrame.origin.x, 3, textLabelFrame.size.width, textLabelFrame.size.height);
+		CGRect detailLabelFrame = self.detailTextLabel.frame;
+		self.detailTextLabel.frame = CGRectMake(detailLabelFrame.origin.x, self.contentView.bounds.size.height - CGRectGetHeight(detailLabelFrame) - 3, detailLabelFrame.size.width, detailLabelFrame.size.height);
+	}
 }
 
 - (void)downloadStarted:(NSNotification *)notification
@@ -197,10 +199,14 @@
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(downloadFinished:) name:DocSetDownloadFinishedNotification object:_download];
 	
 	if (_download) {
+		self.textLabel.font = [UIFont boldSystemFontOfSize:15.0];
 		self.progressView.progress = self.download.progress;
-		self.accessoryView = self.progressView;
+		self.accessoryView = self.cancelDownloadButton;
+		[self.contentView addSubview:self.progressView];
 	} else {
+		self.textLabel.font = [UIFont boldSystemFontOfSize:18.0];
 		self.accessoryView = nil;
+		[self.progressView removeFromSuperview];
 	}
 	[self updateStatusLabel];
 }
@@ -245,6 +251,11 @@
 	} else if ([keyPath isEqualToString:@"status"]) {
 		[self updateStatusLabel];
 	}
+}
+
+- (void)cancelDownload:(id)sender
+{
+    [[DocSetDownloadManager sharedDownloadManager] stopDownload:self.download];
 }
 
 - (void)dealloc
