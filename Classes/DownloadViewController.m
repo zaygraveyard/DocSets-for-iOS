@@ -97,35 +97,6 @@
 	}
 }
 
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
-{
-	NSDictionary *downloadInfo = [[[DocSetDownloadManager sharedDownloadManager] availableDownloads] objectAtIndex:indexPath.row];
-	NSString *name = [downloadInfo objectForKey:@"name"];
-	BOOL downloaded = [[[DocSetDownloadManager sharedDownloadManager] downloadedDocSetNames] containsObject:name];
-	if (downloaded) {
-		return NO;
-	}
-	DocSetDownload *download = [[DocSetDownloadManager sharedDownloadManager] downloadForURL:[downloadInfo objectForKey:@"URL"]];
-	if (!download) {
-		return NO;
-	} else if (download.status == DocSetDownloadStatusDownloading || download.status == DocSetDownloadStatusWaiting || download.status == DocSetDownloadStatusExtracting) {
-		return YES;
-	}
-	return NO;
-}
-
-- (NSString *)tableView:(UITableView *)tableView titleForDeleteConfirmationButtonForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-	return NSLocalizedString(@"Stop", nil);
-}
-
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-	NSDictionary *downloadInfo = [[[DocSetDownloadManager sharedDownloadManager] availableDownloads] objectAtIndex:indexPath.row];
-	DocSetDownload *download = [[DocSetDownloadManager sharedDownloadManager] downloadForURL:[downloadInfo objectForKey:@"URL"]];
-	[[DocSetDownloadManager sharedDownloadManager] stopDownload:download];
-}
-
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -144,7 +115,8 @@
 	self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
 	if (self) {
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(downloadStarted:) name:DocSetDownloadManagerStartedDownloadNotification object:nil];
-        [self setupDownloadInfoView];
+		[self setupDownloadInfoView];
+		
 	}
 	return self;
 }
@@ -155,24 +127,31 @@
     CGFloat cancelButtonWidth = 30;
     CGFloat cancelButtonHeight = 29;
     CGFloat margin = 10;
-    CGFloat downloadInfoViewWidth = progressViewWidth + margin + cancelButtonWidth;
     
     _progressView = [[UIProgressView alloc] initWithProgressViewStyle:UIProgressViewStyleDefault];
-    CGRect pFrame = _progressView.frame;
-    pFrame.origin.y = floorf((cancelButtonHeight - pFrame.size.height) / 2.0);
-    pFrame.size.width = progressViewWidth;
-    _progressView.frame = pFrame;
-    
+	
     _cancelDownloadButton = [UIButton buttonWithType:UIButtonTypeCustom];
     _cancelDownloadButton.frame = CGRectMake(progressViewWidth + margin, 0, cancelButtonWidth, cancelButtonHeight);
     [_cancelDownloadButton setImage:[UIImage imageNamed:@"Cancel.png"] forState:UIControlStateNormal];
     [_cancelDownloadButton setImage:[UIImage imageNamed:@"Cancel-Pressed.png"] forState:UIControlStateHighlighted];
     [_cancelDownloadButton setImage:[UIImage imageNamed:@"Cancel-Pressed.png"] forState:UIControlStateSelected];
     [_cancelDownloadButton addTarget:self action:@selector(cancelDownload:) forControlEvents:UIControlEventTouchUpInside];
-    
-    _downloadInfoView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, downloadInfoViewWidth, cancelButtonHeight)];
-    [_downloadInfoView addSubview:_progressView];
-    [_downloadInfoView addSubview:_cancelDownloadButton];
+}
+
+- (void)layoutSubviews
+{
+	[super layoutSubviews];
+	if (!self.download) {
+		return;
+	}
+	DocSetDownloadStatus status = self.download.status;
+	if (status == DocSetDownloadStatusWaiting || status == DocSetDownloadStatusDownloading || status == DocSetDownloadStatusExtracting) {	
+		self.progressView.frame = CGRectMake(60, CGRectGetMidY(self.contentView.bounds) - self.progressView.bounds.size.height * 0.5, CGRectGetWidth(self.contentView.bounds) - 70, self.progressView.frame.size.height);
+		CGRect textLabelFrame = self.textLabel.frame;
+		self.textLabel.frame = CGRectMake(textLabelFrame.origin.x, 3, textLabelFrame.size.width, textLabelFrame.size.height);
+		CGRect detailLabelFrame = self.detailTextLabel.frame;
+		self.detailTextLabel.frame = CGRectMake(detailLabelFrame.origin.x, self.contentView.bounds.size.height - CGRectGetHeight(detailLabelFrame) - 3, detailLabelFrame.size.width, detailLabelFrame.size.height);
+	}
 }
 
 - (void)downloadStarted:(NSNotification *)notification
@@ -220,10 +199,14 @@
 	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(downloadFinished:) name:DocSetDownloadFinishedNotification object:_download];
 	
 	if (_download) {
+		self.textLabel.font = [UIFont boldSystemFontOfSize:15.0];
 		self.progressView.progress = self.download.progress;
-		self.accessoryView = self.downloadInfoView;
+		self.accessoryView = self.cancelDownloadButton;
+		[self.contentView addSubview:self.progressView];
 	} else {
+		self.textLabel.font = [UIFont boldSystemFontOfSize:18.0];
 		self.accessoryView = nil;
+		[self.progressView removeFromSuperview];
 	}
 	[self updateStatusLabel];
 }
