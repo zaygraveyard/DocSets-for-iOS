@@ -47,6 +47,8 @@
 	for (NSString *path in documents) {
 		if ([[[path pathExtension] lowercaseString] isEqual:@"docset"]) {
 			NSString *fullPath = [docPath stringByAppendingPathComponent:path];
+			u_int8_t b = 1;
+			setxattr([fullPath fileSystemRepresentation], "com.apple.MobileBackup", &b, 1, 0, 0);
 			DocSet *docSet = [[DocSet alloc] initWithPath:fullPath];
 			if (docSet) [loadedSets addObject:docSet];
 		}
@@ -148,8 +150,6 @@
 			NSString *targetPath = [docPath stringByAppendingPathComponent:file];
 			[[NSFileManager defaultManager] moveItemAtPath:fullPath toPath:targetPath error:NULL];
 			NSLog(@"Moved downloaded docset to %@", targetPath);
-			u_int8_t b = 1;
-			setxattr([targetPath fileSystemRepresentation], "com.apple.MobileBackup", &b, 1, 0, 0);
 		}
 	}
 	
