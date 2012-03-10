@@ -10,7 +10,7 @@
 
 @class DetailViewController;
 
-@interface RootViewController : UITableViewController {
+@interface RootViewController : UITableViewController <UIAlertViewDelegate> {
 	
 	DetailViewController *detailViewController;
 }

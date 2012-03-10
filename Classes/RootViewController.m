@@ -13,6 +13,8 @@
 #import "DocSetDownloadManager.h"
 #import "DocSet.h"
 
+#define FIRST_USE_ALERT_TAG		1
+
 @implementation RootViewController
 
 @synthesize detailViewController;
@@ -34,6 +36,28 @@
 	self.tableView.rowHeight = 64.0;
 	self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addDocSet:)];
 	self.navigationItem.rightBarButtonItem = [self editButtonItem];
+	
+	double delayInSeconds = 0.5;
+	dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
+	dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+		if ([[[DocSetDownloadManager sharedDownloadManager] downloadedDocSets] count] == 0) {
+			UIAlertView *firstUseAlert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Welcome", nil)
+																	message:NSLocalizedString(@"To start using the app, you have to download one or more documentation sets first.\n\nTo download more sets later, use the ✚ button.", nil) 
+																   delegate:self
+														  cancelButtonTitle:NSLocalizedString(@"Cancel", nil) 
+														  otherButtonTitles:NSLocalizedString(@"Download...", nil), nil];
+			firstUseAlert.tag = FIRST_USE_ALERT_TAG;
+			[firstUseAlert show];
+		}
+	});
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+	if (alertView.tag == FIRST_USE_ALERT_TAG) {
+		if (buttonIndex == alertView.cancelButtonIndex) return;
+		[self addDocSet:nil];
+	}
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation 
