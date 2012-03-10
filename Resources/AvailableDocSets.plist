@@ -6,6 +6,14 @@
 	<array>
 		<dict>
 			<key>title</key>
+			<string>iOS 5.1 Library</string>
+			<key>name</key>
+			<string>com.apple.adc.documentation.AppleiOS5_1.iOSLibrary.docset</string>
+			<key>URL</key>
+			<string>http://devimages.apple.com/docsets/20120307/com.apple.adc.documentation.AppleiOS5_1.iOSLibrary.xar</string>
+		</dict>
+		<dict>
+			<key>title</key>
 			<string>iOS 5.0 Library</string>
 			<key>name</key>
 			<string>com.apple.adc.documentation.AppleiOS5_0.iOSLibrary.docset</string>
