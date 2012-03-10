@@ -23,19 +23,59 @@
 
 @implementation DocSetDownloadManager
 
-@synthesize downloadedDocSets=_downloadedDocSets, downloadedDocSetNames=_downloadedDocSetNames, availableDownloads=_availableDownloads, currentDownload=_currentDownload;
+@synthesize downloadedDocSets=_downloadedDocSets, downloadedDocSetNames=_downloadedDocSetNames, availableDownloads=_availableDownloads, currentDownload=_currentDownload, lastUpdated=_lastUpdated;
 
 - (id)init
 {
 	self = [super init];
 	if (self) {
-		NSString *docSetsPlistPath = [[NSBundle mainBundle] pathForResource:@"AvailableDocSets" ofType:@"plist"];
-		_availableDownloads = [[NSDictionary dictionaryWithContentsOfFile:docSetsPlistPath] objectForKey:@"DocSets"];
+		[self reloadAvailableDocSets];
 		_downloadsByURL = [NSMutableDictionary new];
 		_downloadQueue = [NSMutableArray new];
 		[self reloadDownloadedDocSets];
 	}
 	return self;
+}
+
+- (void)reloadAvailableDocSets
+{
+	NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+	NSString *cachedAvailableDownloadsPath = [cachesPath stringByAppendingPathComponent:@"AvailableDocSets.plist"];
+	NSFileManager *fm = [[NSFileManager alloc] init];
+	if (![fm fileExistsAtPath:cachedAvailableDownloadsPath]) {
+		NSString *bundledAvailableDocSetsPlistPath = [[NSBundle mainBundle] pathForResource:@"AvailableDocSets" ofType:@"plist"];
+		[fm copyItemAtPath:bundledAvailableDocSetsPlistPath toPath:cachedAvailableDownloadsPath error:NULL];
+	}
+	self.lastUpdated = [[fm attributesOfItemAtPath:cachedAvailableDownloadsPath error:NULL] fileModificationDate];
+	_availableDownloads = [[NSDictionary dictionaryWithContentsOfFile:cachedAvailableDownloadsPath] objectForKey:@"DocSets"];
+}
+
+- (void)updateAvailableDocSetsFromWeb
+{
+	if (_updatingAvailableDocSetsFromWeb) return;
+	_updatingAvailableDocSetsFromWeb = YES;
+	
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		
+		NSURL *availableDocSetsURL = [NSURL URLWithString:@"https://raw.github.com/omz/DocSets-for-iOS/master/Resources/AvailableDocSets.plist"];
+		NSHTTPURLResponse *response = nil;
+		NSData *updatedDocSetsData = [NSURLConnection sendSynchronousRequest:[NSURLRequest requestWithURL:availableDocSetsURL] returningResponse:&response error:NULL];
+		if (response.statusCode == 200) {
+			NSDictionary *plist = [NSPropertyListSerialization propertyListFromData:updatedDocSetsData mutabilityOption:NSPropertyListImmutable format:NULL errorDescription:NULL];
+			if (plist && [plist objectForKey:@"DocSets"]) {
+				NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+				NSString *cachedAvailableDownloadsPath = [cachesPath stringByAppendingPathComponent:@"AvailableDocSets.plist"];
+				[updatedDocSetsData writeToFile:cachedAvailableDownloadsPath atomically:YES];
+			} else {
+				//Downloaded file is somehow not a valid plist...
+			}	
+		}
+		dispatch_async(dispatch_get_main_queue(), ^{
+			_updatingAvailableDocSetsFromWeb = NO;
+			[self reloadAvailableDocSets];
+			[[NSNotificationCenter defaultCenter] postNotificationName:DocSetDownloadManagerAvailableDocSetsChangedNotification object:self];
+		});
+	});
 }
 
 - (void)reloadDownloadedDocSets

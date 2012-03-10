@@ -8,9 +8,10 @@
 
 #import <Foundation/Foundation.h>
 
-#define DocSetDownloadManagerStartedDownloadNotification	@"DocSetDownloadManagerStartedDownloadNotification"
-#define DocSetDownloadManagerUpdatedDocSetsNotification		@"DocSetDownloadManagerUpdatedDocSetsNotification"
-#define DocSetDownloadFinishedNotification					@"DocSetDownloadFinishedNotification"
+#define DocSetDownloadManagerAvailableDocSetsChangedNotification	@"DocSetDownloadManagerAvailableDocSetsChangedNotification"
+#define DocSetDownloadManagerStartedDownloadNotification			@"DocSetDownloadManagerStartedDownloadNotification"
+#define DocSetDownloadManagerUpdatedDocSetsNotification				@"DocSetDownloadManagerUpdatedDocSetsNotification"
+#define DocSetDownloadFinishedNotification							@"DocSetDownloadFinishedNotification"
 
 @class DocSet, DocSetDownload;
 
@@ -23,14 +24,20 @@
 	NSMutableDictionary *_downloadsByURL;
 	DocSetDownload *_currentDownload;
 	NSMutableArray *_downloadQueue;
+	
+	NSDate *_lastUpdated;
+	BOOL _updatingAvailableDocSetsFromWeb;
 }
 
 @property (nonatomic, strong) NSArray *downloadedDocSets;
 @property (nonatomic, strong) NSSet *downloadedDocSetNames;
 @property (nonatomic, strong) NSArray *availableDownloads;
 @property (nonatomic, strong) DocSetDownload *currentDownload;
+@property (nonatomic, strong) NSDate *lastUpdated;
 
 + (id)sharedDownloadManager;
+- (void)reloadAvailableDocSets;
+- (void)updateAvailableDocSetsFromWeb;
 - (void)downloadDocSetAtURL:(NSString *)URL;
 - (void)deleteDocSet:(DocSet *)docSetToDelete;
 - (DocSetDownload *)downloadForURL:(NSString *)URL;

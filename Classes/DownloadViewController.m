@@ -17,6 +17,7 @@
     if (self) {
 		self.title = NSLocalizedString(@"Download", nil);
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(docSetsChanged:) name:DocSetDownloadManagerUpdatedDocSetsNotification object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(availableDocSetsChanged:) name:DocSetDownloadManagerAvailableDocSetsChangedNotification object:nil];
     }
     return self;
 }
@@ -26,6 +27,7 @@
     [super viewDidLoad];
 	self.tableView.rowHeight = 64.0;
 	self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done:)];
+	self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(updateAvailableDocSetsFromWeb:)];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -39,6 +41,18 @@
 - (void)docSetsChanged:(NSNotification *)notification
 {
 	[self.tableView reloadData];
+}
+
+- (void)availableDocSetsChanged:(NSNotification *)notification
+{
+	self.navigationItem.leftBarButtonItem.enabled = YES;
+	[self.tableView reloadData];
+}
+
+- (void)updateAvailableDocSetsFromWeb:(id)sender
+{
+	self.navigationItem.leftBarButtonItem.enabled = NO;
+	[[DocSetDownloadManager sharedDownloadManager] updateAvailableDocSetsFromWeb];
 }
 
 - (void)done:(id)sender
@@ -68,13 +82,13 @@
 	
     NSDictionary *downloadInfo = [[[DocSetDownloadManager sharedDownloadManager] availableDownloads] objectAtIndex:indexPath.row];
 	cell.downloadInfo = downloadInfo;
-	/*
-	cell.textLabel.text = [downloadInfo objectForKey:@"title"];
-	cell.detailTextLabel.text = [downloadInfo objectForKey:@"URL"];
-    cell.imageView.image = [UIImage imageNamed:@"DocSet.png"];
-	*/
-	
+		
     return cell;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
+{
+	return [NSString stringWithFormat:NSLocalizedString(@"Last updated: %@", nil), [NSDateFormatter localizedStringFromDate:[[DocSetDownloadManager sharedDownloadManager] lastUpdated] dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle]];
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

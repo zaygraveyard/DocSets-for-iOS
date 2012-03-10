@@ -31,6 +31,7 @@
 	self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 	
 	[DocSetDownloadManager sharedDownloadManager];
+	
 	self.rootViewController = [[RootViewController alloc] initWithNibName:nil bundle:nil];
 	rootNavigationController = [[UINavigationController alloc] initWithRootViewController:rootViewController];
 	
