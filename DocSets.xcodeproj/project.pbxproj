@@ -77,6 +77,12 @@
 		7F1D435014D1C28B00A85CB3 /* OutlineDisclosureButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F1D434F14D1C28B00A85CB3 /* OutlineDisclosureButton.png */; };
 		7F1D435414D1CF0900A85CB3 /* OutlineDisclosureButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F1D435314D1CF0800A85CB3 /* OutlineDisclosureButton@2x.png */; };
 		7F1D435714D1F15D00A85CB3 /* BookmarksViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F1D435614D1F15C00A85CB3 /* BookmarksViewController.m */; };
+		7F7862F1150D4245003CFB2E /* Icon144.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F7862F0150D4245003CFB2E /* Icon144.png */; };
+		7F7862F4150D4390003CFB2E /* Default-Landscape~ipad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F7862F2150D4390003CFB2E /* Default-Landscape~ipad@2x.png */; };
+		7F7862F5150D4390003CFB2E /* Default-Portrait~ipad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F7862F3150D4390003CFB2E /* Default-Portrait~ipad@2x.png */; };
+		7F7862F8150D4E9C003CFB2E /* AboutIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F7862F6150D4E9C003CFB2E /* AboutIcon.png */; };
+		7F7862F9150D4E9C003CFB2E /* About.html in Resources */ = {isa = PBXBuildFile; fileRef = 7F7862F7150D4E9C003CFB2E /* About.html */; };
+		7F7862FC150D4ECD003CFB2E /* AboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F7862FB150D4ECD003CFB2E /* AboutViewController.m */; };
 		7F8889B414CDEB69007604D7 /* SwipeSplitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F8889B314CDEB69007604D7 /* SwipeSplitViewController.m */; };
 		7F8889B714CDEC13007604D7 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F8889B514CDEC07007604D7 /* QuartzCore.framework */; };
 		7F8E059914CECB6100619A74 /* Shadow.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F8E059814CECB6100619A74 /* Shadow.png */; };
@@ -210,6 +216,13 @@
 		7F1D435314D1CF0800A85CB3 /* OutlineDisclosureButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "OutlineDisclosureButton@2x.png"; sourceTree = "<group>"; };
 		7F1D435514D1F15C00A85CB3 /* BookmarksViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookmarksViewController.h; sourceTree = "<group>"; };
 		7F1D435614D1F15C00A85CB3 /* BookmarksViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarksViewController.m; sourceTree = "<group>"; };
+		7F7862F0150D4245003CFB2E /* Icon144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon144.png; sourceTree = "<group>"; };
+		7F7862F2150D4390003CFB2E /* Default-Landscape~ipad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape~ipad@2x.png"; sourceTree = "<group>"; };
+		7F7862F3150D4390003CFB2E /* Default-Portrait~ipad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad@2x.png"; sourceTree = "<group>"; };
+		7F7862F6150D4E9C003CFB2E /* AboutIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AboutIcon.png; sourceTree = "<group>"; };
+		7F7862F7150D4E9C003CFB2E /* About.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = About.html; sourceTree = "<group>"; };
+		7F7862FA150D4ECD003CFB2E /* AboutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutViewController.h; sourceTree = "<group>"; };
+		7F7862FB150D4ECD003CFB2E /* AboutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutViewController.m; sourceTree = "<group>"; };
 		7F8889B214CDEB69007604D7 /* SwipeSplitViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwipeSplitViewController.h; sourceTree = "<group>"; };
 		7F8889B314CDEB69007604D7 /* SwipeSplitViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SwipeSplitViewController.m; sourceTree = "<group>"; };
 		7F8889B514CDEC07007604D7 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -356,10 +369,13 @@
 		7F1D431214D163FC00A85CB3 /* App Icons */ = {
 			isa = PBXGroup;
 			children = (
-				7F1D426614D0721700A85CB3 /* Icon57.png */,
 				7F1D426214D0708F00A85CB3 /* Icon72.png */,
+				7F1D426614D0721700A85CB3 /* Icon57.png */,
 				7F1D426414D071D500A85CB3 /* Icon114.png */,
+				7F7862F0150D4245003CFB2E /* Icon144.png */,
 				7F1D427A14D1550B00A85CB3 /* iTunesArtwork */,
+				7F7862F6150D4E9C003CFB2E /* AboutIcon.png */,
+				7F7862F7150D4E9C003CFB2E /* About.html */,
 			);
 			name = "App Icons";
 			sourceTree = "<group>";
@@ -371,6 +387,8 @@
 				7F1D434214D18AD600A85CB3 /* Default~iphone@2x.png */,
 				7F1D434314D18AD600A85CB3 /* Default-Portrait~ipad.png */,
 				7F1D434414D18AD600A85CB3 /* Default-Landscape~ipad.png */,
+				7F7862F2150D4390003CFB2E /* Default-Landscape~ipad@2x.png */,
+				7F7862F3150D4390003CFB2E /* Default-Portrait~ipad@2x.png */,
 			);
 			name = "Launch Images";
 			sourceTree = "<group>";
@@ -392,6 +410,8 @@
 				7FACA8EF14CC385D00BADCC8 /* DownloadViewController.m */,
 				7F1D435514D1F15C00A85CB3 /* BookmarksViewController.h */,
 				7F1D435614D1F15C00A85CB3 /* BookmarksViewController.m */,
+				7F7862FA150D4ECD003CFB2E /* AboutViewController.h */,
+				7F7862FB150D4ECD003CFB2E /* AboutViewController.m */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -648,6 +668,11 @@
 				5D892D8B14D73C5A005B3273 /* Cancel-Pressed@2x.png in Resources */,
 				5D892D8C14D73C5A005B3273 /* Cancel.png in Resources */,
 				5D892D8D14D73C5A005B3273 /* Cancel@2x.png in Resources */,
+				7F7862F1150D4245003CFB2E /* Icon144.png in Resources */,
+				7F7862F4150D4390003CFB2E /* Default-Landscape~ipad@2x.png in Resources */,
+				7F7862F5150D4390003CFB2E /* Default-Portrait~ipad@2x.png in Resources */,
+				7F7862F8150D4E9C003CFB2E /* AboutIcon.png in Resources */,
+				7F7862F9150D4E9C003CFB2E /* About.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -690,6 +715,7 @@
 				7F1D430C14D1632700A85CB3 /* util.c in Sources */,
 				7F1D430D14D1632700A85CB3 /* zxar.c in Sources */,
 				7F1D435714D1F15D00A85CB3 /* BookmarksViewController.m in Sources */,
+				7F7862FC150D4ECD003CFB2E /* AboutViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

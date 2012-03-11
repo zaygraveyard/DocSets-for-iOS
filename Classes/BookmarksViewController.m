@@ -3,7 +3,7 @@
 //  DocSets
 //
 //  Created by Ole Zorn on 26.01.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 omz:software. All rights reserved.
 //
 
 #import "BookmarksViewController.h"

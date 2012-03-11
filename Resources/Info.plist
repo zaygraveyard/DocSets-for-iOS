@@ -17,6 +17,7 @@
 		<string>Icon57.png</string>
 		<string>Icon72.png</string>
 		<string>Icon114.png</string>
+		<string>Icon144.png</string>
 	</array>
 	<key>CFBundleIdentifier</key>
 	<string>com.omz-software.${PRODUCT_NAME:rfc1034identifier}</string>

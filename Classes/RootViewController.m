@@ -12,6 +12,7 @@
 #import "DownloadViewController.h"
 #import "DocSetDownloadManager.h"
 #import "DocSet.h"
+#import "AboutViewController.h"
 
 #define FIRST_USE_ALERT_TAG		1
 
@@ -36,6 +37,18 @@
 	self.tableView.rowHeight = 64.0;
 	self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addDocSet:)];
 	self.navigationItem.rightBarButtonItem = [self editButtonItem];
+	
+	UIView *footerView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.bounds.size.width, 64)];
+	UIButton *aboutButton = [UIButton buttonWithType:UIButtonTypeCustom];
+	[aboutButton setTitle:NSLocalizedString(@"About DocSets", nil) forState:UIControlStateNormal];
+	[aboutButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
+	aboutButton.titleLabel.font = [UIFont systemFontOfSize:14.0];
+	aboutButton.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+	aboutButton.showsTouchWhenHighlighted = YES;
+	[aboutButton setFrame:CGRectInset(footerView.bounds, 50, 20)];
+	[aboutButton addTarget:self action:@selector(showInfo:) forControlEvents:UIControlEventTouchUpInside];
+	[footerView addSubview:aboutButton];
+	self.tableView.tableFooterView = footerView;
 	
 	double delayInSeconds = 0.5;
 	dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, delayInSeconds * NSEC_PER_SEC);
@@ -76,6 +89,17 @@
 	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:vc];
 	navController.modalPresentationStyle = UIModalPresentationFormSheet;
 	[self presentModalViewController:navController animated:YES];
+}
+
+- (void)showInfo:(id)sender
+{
+	//TODO: Show info dialog with libxar license
+	AboutViewController *vc = [[AboutViewController alloc] initWithNibName:nil bundle:nil];
+	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:vc];
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+		navController.modalPresentationStyle = UIModalPresentationFormSheet;
+	}
+	[self.view.window.rootViewController presentModalViewController:navController animated:YES];
 }
 
 - (void)docSetsChanged:(NSNotification *)notification
