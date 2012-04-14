@@ -313,7 +313,11 @@
 	if (aTableView == self.tableView) {
 		NSDictionary *nodeSection = [nodeSections objectAtIndex:indexPath.section];
 		NSManagedObject *node = [[nodeSection objectForKey:kNodeSectionNodes] objectAtIndex:indexPath.row];
-		[self openNode:node];
+		if ([[node valueForKey:@"installDomain"] intValue] > 1) {
+			[aTableView deselectRowAtIndexPath:indexPath animated:YES];
+		} else {
+			[self openNode:node];
+		}
 	} else if (aTableView == self.searchDisplayController.searchResultsTableView) {
 		[self.searchDisplayController.searchBar resignFirstResponder];
 		NSDictionary *result = [searchResults objectAtIndex:indexPath.row];
@@ -327,7 +331,11 @@
 			}
 		} else {
 			NSManagedObject *node = [[docSet managedObjectContext] existingObjectWithID:[result objectForKey:@"objectID"] error:NULL];
-			[self openNode:node];
+			if ([[node valueForKey:@"installDomain"] intValue] > 1) {
+				[aTableView deselectRowAtIndexPath:indexPath animated:YES];
+			} else {
+				[self openNode:node];
+			}
 		}
 	}
 }
