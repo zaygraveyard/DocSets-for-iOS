@@ -7,10 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <MessageUI/MessageUI.h>
 
 @class DocSet, DetailViewController;
 
-@interface BookmarksViewController : UITableViewController {
+@interface BookmarksViewController : UITableViewController <MFMailComposeViewControllerDelegate> {
 
 	DocSet *docSet;
 	__weak DetailViewController *detailViewController;

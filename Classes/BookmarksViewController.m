@@ -9,6 +9,8 @@
 #import "BookmarksViewController.h"
 #import "DetailViewController.h"
 #import "DocSet.h"
+#import "BookmarksManager.h"
+
 
 @implementation BookmarksViewController
 
@@ -16,19 +18,78 @@
 
 - (id)initWithDocSet:(DocSet *)selectedDocSet
 {
-	self = [super initWithStyle:UITableViewStyleGrouped];
+	self = [super initWithStyle:UITableViewStylePlain];
 	if (self) {
 		self.title = NSLocalizedString(@"Bookmarks", nil);
 		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
 			self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done:)];
-			self.navigationItem.leftBarButtonItem = [self editButtonItem];
 		} else {
 			self.contentSizeForViewInPopover = CGSizeMake(320, 480);
-			self.navigationItem.rightBarButtonItem = [self editButtonItem];
 		}
+				
+		UIBarButtonItem *shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareBookmarks:)];
+		UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+		self.toolbarItems = [NSArray arrayWithObjects:[self editButtonItem], flexSpace, shareItem, nil];
+		
 		docSet = selectedDocSet;
+		
+		[[BookmarksManager sharedBookmarksManager] addObserver:self forKeyPath:@"bookmarksEditable" options:NSKeyValueObservingOptionNew context:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bookmarksDidUpdate:) name:BookmarksDidUpdateNotification object:nil];
 	}
 	return self;
+}
+
+- (void)shareBookmarks:(id)sender
+{
+	if (![MFMailComposeViewController canSendMail]) {
+		[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Send Mail", nil) 
+									message:NSLocalizedString(@"Your device is not configured for sending email. Please use the Settings app to set up an email account.", nil) 
+								   delegate:nil 
+						  cancelButtonTitle:NSLocalizedString(@"OK", nil) 
+						  otherButtonTitles:nil] show];
+		return;
+	}
+	
+	MFMailComposeViewController *mailComposer = [[MFMailComposeViewController alloc] init];
+	[mailComposer setSubject:NSLocalizedString(@"DocSets Bookmarks", nil)];
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+		mailComposer.modalPresentationStyle = UIModalPresentationFormSheet;
+	}
+	mailComposer.mailComposeDelegate = self;
+	
+	NSMutableString *html = [NSMutableString string];
+	NSArray *bookmarks = [[BookmarksManager sharedBookmarksManager] bookmarksForDocSet:docSet];
+	for (NSDictionary *bookmark in bookmarks) {
+		[html appendFormat:@"<p><a href='%@'>%@</a><br/><span style='color:#666'>%@</span></p>", [[BookmarksManager sharedBookmarksManager] webURLForBookmark:bookmark inDocSet:docSet], [bookmark objectForKey:@"title"], [bookmark objectForKey:@"subtitle"] ? [bookmark objectForKey:@"subtitle"] : @""];
+	}
+	[mailComposer setMessageBody:html isHTML:YES];
+	
+	[self presentModalViewController:mailComposer animated:YES];
+}
+
+- (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
+{
+	[controller dismissModalViewControllerAnimated:YES];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+	if ([keyPath isEqualToString:@"bookmarksEditable"]) {
+		BOOL bookmarksEditable = [[BookmarksManager sharedBookmarksManager] bookmarksEditable];
+		if (bookmarksEditable) {
+			self.editButtonItem.enabled = YES;
+		} else {
+			if (self.editing) {
+				[self setEditing:NO animated:YES];
+			}
+			self.editButtonItem.enabled = NO;
+		}
+	}
+}
+
+- (void)bookmarksDidUpdate:(NSNotification *)notification
+{
+	[self.tableView reloadData];
 }
 
 - (void)viewDidLoad
@@ -49,6 +110,18 @@
 	[self dismissModalViewControllerAnimated:YES];
 }
 
+- (void)setEditing:(BOOL)editing animated:(BOOL)animated
+{
+	[super setEditing:editing animated:animated];
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+		if (editing) {
+			self.navigationItem.rightBarButtonItem = nil;
+		} else {
+			self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done:)];
+		}
+	}
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
 	return 1;
@@ -56,7 +129,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	return [[docSet bookmarks] count];
+	return [[[BookmarksManager sharedBookmarksManager] bookmarksForDocSet:docSet] count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -64,13 +137,16 @@
 	static NSString *CellIdentifier = @"Cell";
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
     if (cell == nil) {
-		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
+		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
 		cell.textLabel.minimumFontSize = 13.0;
-		cell.textLabel.adjustsFontSizeToFitWidth = YES;	
+		cell.textLabel.adjustsFontSizeToFitWidth = YES;
+		cell.textLabel.lineBreakMode = UILineBreakModeMiddleTruncation;
 	}
 	
-	NSDictionary *bookmark = [[docSet bookmarks] objectAtIndex:indexPath.row];
+	NSDictionary *bookmark = [[[BookmarksManager sharedBookmarksManager] bookmarksForDocSet:docSet] objectAtIndex:indexPath.row];
+	
 	cell.textLabel.text = [bookmark objectForKey:@"title"];
+	cell.detailTextLabel.text = [bookmark objectForKey:@"subtitle"];
     
 	return cell;
 }
@@ -78,32 +154,38 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	if (editingStyle == UITableViewCellEditingStyleDelete) {
-		// Delete the row from the data source
-		[[docSet bookmarks] removeObjectAtIndex:indexPath.row];
-		[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
-		[docSet saveBookmarks];
+		if ([[BookmarksManager sharedBookmarksManager] deleteBookmarkAtIndex:indexPath.row fromDocSet:docSet]) {
+			[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+		} else {
+			[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) 
+										message:NSLocalizedString(@"Bookmarks are currently being synced. Please try again in a moment.", nil) 
+									   delegate:nil 
+							  cancelButtonTitle:NSLocalizedString(@"OK", nil) 
+							  otherButtonTitles:nil] show];
+		}
 	}
 }
 
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
 {
 	if (toIndexPath.row != fromIndexPath.row) {
-		NSDictionary *movedBookmark = [[docSet bookmarks] objectAtIndex:fromIndexPath.row];
-        [[docSet bookmarks] removeObjectAtIndex:fromIndexPath.row];
-		if (toIndexPath.row >= [[docSet bookmarks] count]) {
-			[[docSet bookmarks] addObject:movedBookmark];
-        } else {
-			[[docSet bookmarks] insertObject:movedBookmark atIndex:toIndexPath.row];
-		}
-		[docSet saveBookmarks];
-    }
+		[[BookmarksManager sharedBookmarksManager] moveBookmarkAtIndex:fromIndexPath.row inDocSet:docSet toIndex:toIndexPath.row];
+	}
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
-	NSDictionary *selectedBookmark = [[docSet bookmarks] objectAtIndex:indexPath.row];
+	
+	NSDictionary *selectedBookmark = [[[BookmarksManager sharedBookmarksManager] bookmarksForDocSet:docSet] objectAtIndex:indexPath.row];
+	
 	[self.detailViewController showBookmark:selectedBookmark];
+}
+
+- (void)dealloc
+{
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	[[BookmarksManager sharedBookmarksManager] removeObserver:self forKeyPath:@"bookmarksEditable"];
 }
 
 @end

@@ -12,6 +12,7 @@
 #import "SwipeSplitViewController.h"
 #import "BookmarksViewController.h"
 #import "DocSet.h"
+#import "BookmarksManager.h"
 
 #define EXTERNAL_LINK_ALERT_TAG	1
 
@@ -54,8 +55,18 @@
 		spaceItem.width = 24.0;	
 		portraitToolbarItems = [NSArray arrayWithObjects:browseButtonItem, spaceItem, backButtonItem, spaceItem, forwardButtonItem, flexSpace, bookmarksButtonItem, spaceItem, actionButtonItem, spaceItem, outlineButtonItem, nil];
 		landscapeToolbarItems = [NSArray arrayWithObjects:backButtonItem, spaceItem, forwardButtonItem, flexSpace, bookmarksButtonItem, spaceItem, actionButtonItem, spaceItem, outlineButtonItem, nil];
-	}	
+	}
+	
+	[[BookmarksManager sharedBookmarksManager] addObserver:self forKeyPath:@"bookmarksAvailable" options:NSKeyValueObservingOptionNew context:nil];
+		
 	return self;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+	if ([keyPath isEqualToString:@"bookmarksAvailable"]) {
+		bookmarksButtonItem.enabled = [[BookmarksManager sharedBookmarksManager] bookmarksAvailable] && self.docSet != nil;
+	}
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -233,6 +244,27 @@
 		NSURL *URL = [NSURL URLWithString:currentURLString];
 		if (buttonIndex == 0) {
 			NSString *bookmarkTitle = [webView stringByEvaluatingJavaScriptFromString:@"document.title"];
+			NSString *bookmarkURL = currentURLString;
+			NSString *fragment = [URL fragment];
+			NSString *subtitle = @"";
+			if (fragment && fragment.length > 0) {
+				NSString *js = [NSString stringWithFormat:@"var elements = document.getElementsByName('%@'); if (elements.length > 0) { elements[0].title; } else { ''; }", 
+								fragment];
+				NSString *fragmentTitle = [webView stringByEvaluatingJavaScriptFromString:js];
+				subtitle = fragmentTitle;
+			}
+			if (bookmarkTitle && bookmarkURL) {
+				BOOL bookmarkAdded = [[BookmarksManager sharedBookmarksManager] addBookmarkWithURL:bookmarkURL title:bookmarkTitle subtitle:subtitle forDocSet:self.docSet];
+				if (!bookmarkAdded) {
+					[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) 
+												message:NSLocalizedString(@"Bookmarks are currently being synced. Please try again in a moment.", nil) 
+											   delegate:nil 
+									  cancelButtonTitle:NSLocalizedString(@"OK", nil) 
+									  otherButtonTitles:nil] show];
+				}
+			}
+			
+			/*
 			NSMutableArray *bookmarks = [self.docSet bookmarks];
 			NSDictionary *existingBookmark = nil;
 			NSInteger existingBookmarkIndex = 0;
@@ -252,6 +284,7 @@
 			NSDictionary *newBookmark = [NSDictionary dictionaryWithObjectsAndKeys:currentURLString, @"URL", bookmarkTitle, @"title", nil];
 			[bookmarks insertObject:newBookmark atIndex:0];
 			[self.docSet saveBookmarks];
+			 */
 		} else {
 			NSURL *webURL = [self.docSet webURLForLocalURL:URL];
 			if (buttonIndex == 1) {
@@ -276,6 +309,7 @@
 		BookmarksViewController *vc = [[BookmarksViewController alloc] initWithDocSet:self.docSet];
 		vc.detailViewController = self;
 		UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:vc];
+		navController.toolbarHidden = NO;
 		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
 			bookmarksPopover = [[UIPopoverController alloc] initWithContentViewController:navController];
 			[bookmarksPopover presentPopoverFromBarButtonItem:sender permittedArrowDirections:UIPopoverArrowDirectionUp animated:YES];
@@ -295,7 +329,7 @@
 - (void)setDocSet:(DocSet *)aDocSet
 {
 	docSet = aDocSet;
-	bookmarksButtonItem.enabled = (docSet != nil);
+	bookmarksButtonItem.enabled = [[BookmarksManager sharedBookmarksManager] bookmarksAvailable];
 }
 
 #pragma mark -
@@ -369,7 +403,8 @@
 
 - (void)showBookmark:(NSDictionary *)bookmark
 {
-	[self openURL:[NSURL URLWithString:[bookmark objectForKey:@"URL"]] withAnchor:nil];
+	NSURL *bookmarkURL = [[BookmarksManager sharedBookmarksManager] URLForBookmark:bookmark inDocSet:self.docSet];
+	[self openURL:bookmarkURL withAnchor:nil];
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
 		[bookmarksPopover dismissPopoverAnimated:YES];
 	} else {
@@ -530,6 +565,7 @@
 
 - (void)dealloc 
 {
+	[[BookmarksManager sharedBookmarksManager] removeObserver:self forKeyPath:@"bookmarksAvailable"];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

@@ -11,7 +11,7 @@
 
 @implementation DocSet
 
-@synthesize path, title, copyright, bookmarks;
+@synthesize path, title, copyright, bundleID, bookmarks;
 
 - (id)initWithPath:(NSString *)docSetPath
 {
@@ -22,6 +22,8 @@
 	NSString *infoPath = [path stringByAppendingPathComponent:@"Contents/Info.plist"];
 	NSDictionary *info = [NSDictionary dictionaryWithContentsOfFile:infoPath];
 	title = [info objectForKey:@"CFBundleName"];
+	bundleID = [info objectForKey:@"CFBundleIdentifier"];
+	
 	fallbackURL = [NSURL URLWithString:[info objectForKey:@"DocSetFallbackURL"]];
 	if (title) {
 		copyright = [info objectForKey:@"NSHumanReadableCopyright"];
@@ -29,8 +31,10 @@
 	} else {
 		self = nil;
 	}
-		
+	
 	searchQueue = dispatch_queue_create("DocSet Search Queue", NULL);
+	
+	//NSLog(@"Legacy bookmarks: %@", self.bookmarks);
 	
 	return self;
 }

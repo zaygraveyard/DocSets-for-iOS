@@ -77,6 +77,7 @@
 		7F1D435014D1C28B00A85CB3 /* OutlineDisclosureButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F1D434F14D1C28B00A85CB3 /* OutlineDisclosureButton.png */; };
 		7F1D435414D1CF0900A85CB3 /* OutlineDisclosureButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F1D435314D1CF0800A85CB3 /* OutlineDisclosureButton@2x.png */; };
 		7F1D435714D1F15D00A85CB3 /* BookmarksViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F1D435614D1F15C00A85CB3 /* BookmarksViewController.m */; };
+		7F2235C71541843F00419E71 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F2235C51541843200419E71 /* MessageUI.framework */; };
 		7F7862F1150D4245003CFB2E /* Icon144.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F7862F0150D4245003CFB2E /* Icon144.png */; };
 		7F7862F4150D4390003CFB2E /* Default-Landscape~ipad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F7862F2150D4390003CFB2E /* Default-Landscape~ipad@2x.png */; };
 		7F7862F5150D4390003CFB2E /* Default-Portrait~ipad@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F7862F3150D4390003CFB2E /* Default-Portrait~ipad@2x.png */; };
@@ -89,6 +90,9 @@
 		7FACA8EA14CC0A2100BADCC8 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FACA8E914CC0A2100BADCC8 /* libxml2.dylib */; };
 		7FACA8ED14CC371C00BADCC8 /* DocSetDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FACA8EC14CC371C00BADCC8 /* DocSetDownloadManager.m */; };
 		7FACA8F014CC385D00BADCC8 /* DownloadViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FACA8EF14CC385D00BADCC8 /* DownloadViewController.m */; };
+		7FDB346B153F266D00A4AF5F /* BookmarksDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FDB346A153F266D00A4AF5F /* BookmarksDocument.m */; };
+		7FDB346E154029B200A4AF5F /* BookmarksManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FDB346D154029B100A4AF5F /* BookmarksManager.m */; };
+		7FDB349F1540D38900A4AF5F /* NSString+RelativePath.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FDB349E1540D38900A4AF5F /* NSString+RelativePath.m */; };
 		7FF7040512AB0CE3001FF09F /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FF7040412AB0CE3001FF09F /* CoreData.framework */; };
 		7FF706CA12ABE88A001FF09F /* DocSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF706C912ABE88A001FF09F /* DocSet.m */; };
 		7FF706D512ABEF76001FF09F /* DocSetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF706D412ABEF76001FF09F /* DocSetViewController.m */; };
@@ -216,6 +220,7 @@
 		7F1D435314D1CF0800A85CB3 /* OutlineDisclosureButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "OutlineDisclosureButton@2x.png"; sourceTree = "<group>"; };
 		7F1D435514D1F15C00A85CB3 /* BookmarksViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookmarksViewController.h; sourceTree = "<group>"; };
 		7F1D435614D1F15C00A85CB3 /* BookmarksViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarksViewController.m; sourceTree = "<group>"; };
+		7F2235C51541843200419E71 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		7F7862F0150D4245003CFB2E /* Icon144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon144.png; sourceTree = "<group>"; };
 		7F7862F2150D4390003CFB2E /* Default-Landscape~ipad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape~ipad@2x.png"; sourceTree = "<group>"; };
 		7F7862F3150D4390003CFB2E /* Default-Portrait~ipad@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Portrait~ipad@2x.png"; sourceTree = "<group>"; };
@@ -232,6 +237,13 @@
 		7FACA8EC14CC371C00BADCC8 /* DocSetDownloadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DocSetDownloadManager.m; sourceTree = "<group>"; };
 		7FACA8EE14CC385D00BADCC8 /* DownloadViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DownloadViewController.h; sourceTree = "<group>"; };
 		7FACA8EF14CC385D00BADCC8 /* DownloadViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadViewController.m; sourceTree = "<group>"; };
+		7FDB3468153F156900A4AF5F /* DocSets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = DocSets.entitlements; sourceTree = "<group>"; };
+		7FDB3469153F266D00A4AF5F /* BookmarksDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookmarksDocument.h; sourceTree = "<group>"; };
+		7FDB346A153F266D00A4AF5F /* BookmarksDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarksDocument.m; sourceTree = "<group>"; };
+		7FDB346C154029B100A4AF5F /* BookmarksManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookmarksManager.h; sourceTree = "<group>"; };
+		7FDB346D154029B100A4AF5F /* BookmarksManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarksManager.m; sourceTree = "<group>"; };
+		7FDB349D1540D38800A4AF5F /* NSString+RelativePath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+RelativePath.h"; sourceTree = "<group>"; };
+		7FDB349E1540D38900A4AF5F /* NSString+RelativePath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+RelativePath.m"; sourceTree = "<group>"; };
 		7FF7040412AB0CE3001FF09F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		7FF706C812ABE88A001FF09F /* DocSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocSet.h; sourceTree = "<group>"; };
 		7FF706C912ABE88A001FF09F /* DocSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DocSet.m; sourceTree = "<group>"; };
@@ -265,6 +277,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7FACA8EA14CC0A2100BADCC8 /* libxml2.dylib in Frameworks */,
+				7F2235C71541843F00419E71 /* MessageUI.framework in Frameworks */,
 				1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */,
 				1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */,
 				2892E4100DC94CBA00A64D0F /* CoreGraphics.framework in Frameworks */,
@@ -300,6 +313,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				7FDB3468153F156900A4AF5F /* DocSets.entitlements */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
@@ -334,6 +348,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7F2235C51541843200419E71 /* MessageUI.framework */,
 				7F8889B514CDEC07007604D7 /* QuartzCore.framework */,
 				1DF5F4DF0D08C38300B7A737 /* UIKit.framework */,
 				1D30AB110D05D00D00671497 /* Foundation.framework */,
@@ -419,10 +434,16 @@
 		7F1D435214D1CDE800A85CB3 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				7FDB349D1540D38800A4AF5F /* NSString+RelativePath.h */,
+				7FDB349E1540D38900A4AF5F /* NSString+RelativePath.m */,
 				7FF706C812ABE88A001FF09F /* DocSet.h */,
 				7FF706C912ABE88A001FF09F /* DocSet.m */,
 				7FACA8EB14CC371C00BADCC8 /* DocSetDownloadManager.h */,
 				7FACA8EC14CC371C00BADCC8 /* DocSetDownloadManager.m */,
+				7FDB346C154029B100A4AF5F /* BookmarksManager.h */,
+				7FDB346D154029B100A4AF5F /* BookmarksManager.m */,
+				7FDB3469153F266D00A4AF5F /* BookmarksDocument.h */,
+				7FDB346A153F266D00A4AF5F /* BookmarksDocument.m */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -583,7 +604,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "DocSets" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -716,6 +737,9 @@
 				7F1D430D14D1632700A85CB3 /* zxar.c in Sources */,
 				7F1D435714D1F15D00A85CB3 /* BookmarksViewController.m in Sources */,
 				7F7862FC150D4ECD003CFB2E /* AboutViewController.m in Sources */,
+				7FDB346B153F266D00A4AF5F /* BookmarksDocument.m in Sources */,
+				7FDB346E154029B200A4AF5F /* BookmarksManager.m in Sources */,
+				7FDB349F1540D38900A4AF5F /* NSString+RelativePath.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -727,6 +751,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = DocSets.entitlements;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -753,6 +778,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = DocSets.entitlements;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = OtherSources/DocSets_Prefix.pch;
@@ -773,46 +799,6 @@
 			};
 			name = Release;
 		};
-		7F22D17013029DDF0052AF6E /* Release copy */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
-				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = "Release copy";
-		};
-		7F22D17113029DDF0052AF6E /* Release copy */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = OtherSources/DocSets_Prefix.pch;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				HEADER_SEARCH_PATHS = (
-					"OtherSources/lib/include/**",
-					"${SDKROOT}/usr/include/libxml2/**",
-				);
-				INFOPLIST_FILE = Resources/Info.plist;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SDKROOT)/usr/lib/system\"",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/OtherSources/lib\"",
-				);
-				PRODUCT_NAME = DocSets;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = "Release copy";
-		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -822,6 +808,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -831,12 +818,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Ole Zorn";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "7E4370B5-AC58-40FE-AA56-BF8183393035";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -850,7 +838,6 @@
 			buildConfigurations = (
 				1D6058940D05DD3E006BFB54 /* Debug */,
 				1D6058950D05DD3E006BFB54 /* Release */,
-				7F22D17113029DDF0052AF6E /* Release copy */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -860,7 +847,6 @@
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
 				C01FCF5008A954540054247B /* Release */,
-				7F22D17013029DDF0052AF6E /* Release copy */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
