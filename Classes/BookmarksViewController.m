@@ -9,7 +9,7 @@
 #import "BookmarksViewController.h"
 #import "DetailViewController.h"
 #import "DocSet.h"
-#import "BookmarksManager2.h"
+#import "BookmarksManager.h"
 
 
 @implementation BookmarksViewController
@@ -57,9 +57,9 @@
 	mailComposer.mailComposeDelegate = self;
 	
 	NSMutableString *html = [NSMutableString string];
-	NSArray *bookmarks = [[BookmarksManager2 sharedBookmarksManager] bookmarksForDocSet:docSet];
+	NSArray *bookmarks = [[BookmarksManager sharedBookmarksManager] bookmarksForDocSet:docSet];
 	for (NSDictionary *bookmark in bookmarks) {
-		[html appendFormat:@"<p><a href='%@'>%@</a><br/><span style='color:#666'>%@</span></p>", [[BookmarksManager2 sharedBookmarksManager] webURLForBookmark:bookmark inDocSet:docSet], [bookmark objectForKey:@"title"], [bookmark objectForKey:@"subtitle"] ? [bookmark objectForKey:@"subtitle"] : @""];
+		[html appendFormat:@"<p><a href='%@'>%@</a><br/><span style='color:#666'>%@</span></p>", [[BookmarksManager sharedBookmarksManager] webURLForBookmark:bookmark inDocSet:docSet], [bookmark objectForKey:@"title"], [bookmark objectForKey:@"subtitle"] ? [bookmark objectForKey:@"subtitle"] : @""];
 	}
 	[mailComposer setMessageBody:html isHTML:YES];
 	
@@ -113,7 +113,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-	return [[[BookmarksManager2 sharedBookmarksManager] bookmarksForDocSet:docSet] count];
+	return [[[BookmarksManager sharedBookmarksManager] bookmarksForDocSet:docSet] count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -127,7 +127,7 @@
 		cell.textLabel.lineBreakMode = UILineBreakModeMiddleTruncation;
 	}
 	
-	NSDictionary *bookmark = [[[BookmarksManager2 sharedBookmarksManager] bookmarksForDocSet:docSet] objectAtIndex:indexPath.row];
+	NSDictionary *bookmark = [[[BookmarksManager sharedBookmarksManager] bookmarksForDocSet:docSet] objectAtIndex:indexPath.row];
 	
 	cell.textLabel.text = [bookmark objectForKey:@"title"];
 	cell.detailTextLabel.text = [bookmark objectForKey:@"subtitle"];
@@ -138,7 +138,7 @@
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	if (editingStyle == UITableViewCellEditingStyleDelete) {
-		if ([[BookmarksManager2 sharedBookmarksManager] deleteBookmarkAtIndex:indexPath.row fromDocSet:docSet]) {
+		if ([[BookmarksManager sharedBookmarksManager] deleteBookmarkAtIndex:indexPath.row fromDocSet:docSet]) {
 			[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
 		} else {
 			[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) 
@@ -153,7 +153,7 @@
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
 {
 	if (toIndexPath.row != fromIndexPath.row) {
-		[[BookmarksManager2 sharedBookmarksManager] moveBookmarkAtIndex:fromIndexPath.row inDocSet:docSet toIndex:toIndexPath.row];
+		[[BookmarksManager sharedBookmarksManager] moveBookmarkAtIndex:fromIndexPath.row inDocSet:docSet toIndex:toIndexPath.row];
 	}
 }
 
@@ -161,7 +161,7 @@
 {
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
 	
-	NSDictionary *selectedBookmark = [[[BookmarksManager2 sharedBookmarksManager] bookmarksForDocSet:docSet] objectAtIndex:indexPath.row];
+	NSDictionary *selectedBookmark = [[[BookmarksManager sharedBookmarksManager] bookmarksForDocSet:docSet] objectAtIndex:indexPath.row];
 	
 	[self.detailViewController showBookmark:selectedBookmark];
 }

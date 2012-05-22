@@ -12,7 +12,7 @@
 #import "SwipeSplitViewController.h"
 #import "BookmarksViewController.h"
 #import "DocSet.h"
-#import "BookmarksManager2.h"
+#import "BookmarksManager.h"
 
 #define EXTERNAL_LINK_ALERT_TAG	1
 
@@ -245,7 +245,7 @@
 				subtitle = fragmentTitle;
 			}
 			if (bookmarkTitle && bookmarkURL) {
-				BOOL bookmarkAdded = [[BookmarksManager2 sharedBookmarksManager] addBookmarkWithURL:bookmarkURL title:bookmarkTitle subtitle:subtitle forDocSet:self.docSet];
+				BOOL bookmarkAdded = [[BookmarksManager sharedBookmarksManager] addBookmarkWithURL:bookmarkURL title:bookmarkTitle subtitle:subtitle forDocSet:self.docSet];
 				if (!bookmarkAdded) {
 					[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) 
 												message:NSLocalizedString(@"Bookmarks are currently being synced. Please try again in a moment.", nil) 
@@ -373,7 +373,7 @@
 
 - (void)showBookmark:(NSDictionary *)bookmark
 {
-	NSURL *bookmarkURL = [[BookmarksManager2 sharedBookmarksManager] URLForBookmark:bookmark inDocSet:self.docSet];
+	NSURL *bookmarkURL = [[BookmarksManager sharedBookmarksManager] URLForBookmark:bookmark inDocSet:self.docSet];
 	[self openURL:bookmarkURL withAnchor:nil];
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
 		[bookmarksPopover dismissPopoverAnimated:YES];

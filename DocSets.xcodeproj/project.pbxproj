@@ -90,10 +90,8 @@
 		7FACA8EA14CC0A2100BADCC8 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FACA8E914CC0A2100BADCC8 /* libxml2.dylib */; };
 		7FACA8ED14CC371C00BADCC8 /* DocSetDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FACA8EC14CC371C00BADCC8 /* DocSetDownloadManager.m */; };
 		7FACA8F014CC385D00BADCC8 /* DownloadViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FACA8EF14CC385D00BADCC8 /* DownloadViewController.m */; };
-		7FDB346B153F266D00A4AF5F /* BookmarksDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FDB346A153F266D00A4AF5F /* BookmarksDocument.m */; };
-		7FDB346E154029B200A4AF5F /* BookmarksManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FDB346D154029B100A4AF5F /* BookmarksManager.m */; };
 		7FDB349F1540D38900A4AF5F /* NSString+RelativePath.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FDB349E1540D38900A4AF5F /* NSString+RelativePath.m */; };
-		7FEFBF2C156B619D00C75316 /* BookmarksManager2.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FEFBF2B156B619D00C75316 /* BookmarksManager2.m */; };
+		7FEFBF2C156B619D00C75316 /* BookmarksManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FEFBF2B156B619D00C75316 /* BookmarksManager.m */; };
 		7FF7040512AB0CE3001FF09F /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FF7040412AB0CE3001FF09F /* CoreData.framework */; };
 		7FF706CA12ABE88A001FF09F /* DocSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF706C912ABE88A001FF09F /* DocSet.m */; };
 		7FF706D512ABEF76001FF09F /* DocSetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF706D412ABEF76001FF09F /* DocSetViewController.m */; };
@@ -239,14 +237,10 @@
 		7FACA8EE14CC385D00BADCC8 /* DownloadViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DownloadViewController.h; sourceTree = "<group>"; };
 		7FACA8EF14CC385D00BADCC8 /* DownloadViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadViewController.m; sourceTree = "<group>"; };
 		7FDB3468153F156900A4AF5F /* DocSets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = DocSets.entitlements; sourceTree = "<group>"; };
-		7FDB3469153F266D00A4AF5F /* BookmarksDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookmarksDocument.h; sourceTree = "<group>"; };
-		7FDB346A153F266D00A4AF5F /* BookmarksDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarksDocument.m; sourceTree = "<group>"; };
-		7FDB346C154029B100A4AF5F /* BookmarksManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookmarksManager.h; sourceTree = "<group>"; };
-		7FDB346D154029B100A4AF5F /* BookmarksManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarksManager.m; sourceTree = "<group>"; };
 		7FDB349D1540D38800A4AF5F /* NSString+RelativePath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+RelativePath.h"; sourceTree = "<group>"; };
 		7FDB349E1540D38900A4AF5F /* NSString+RelativePath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+RelativePath.m"; sourceTree = "<group>"; };
-		7FEFBF2A156B619D00C75316 /* BookmarksManager2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookmarksManager2.h; sourceTree = "<group>"; };
-		7FEFBF2B156B619D00C75316 /* BookmarksManager2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarksManager2.m; sourceTree = "<group>"; };
+		7FEFBF2A156B619D00C75316 /* BookmarksManager.h */ = {isa = PBXFileReference; fileEncoding = 4; path = BookmarksManager.h; sourceTree = "<group>"; };
+		7FEFBF2B156B619D00C75316 /* BookmarksManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarksManager.m; sourceTree = "<group>"; };
 		7FF7040412AB0CE3001FF09F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		7FF706C812ABE88A001FF09F /* DocSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocSet.h; sourceTree = "<group>"; };
 		7FF706C912ABE88A001FF09F /* DocSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DocSet.m; sourceTree = "<group>"; };
@@ -443,12 +437,8 @@
 				7FF706C912ABE88A001FF09F /* DocSet.m */,
 				7FACA8EB14CC371C00BADCC8 /* DocSetDownloadManager.h */,
 				7FACA8EC14CC371C00BADCC8 /* DocSetDownloadManager.m */,
-				7FDB346C154029B100A4AF5F /* BookmarksManager.h */,
-				7FDB346D154029B100A4AF5F /* BookmarksManager.m */,
-				7FDB3469153F266D00A4AF5F /* BookmarksDocument.h */,
-				7FDB346A153F266D00A4AF5F /* BookmarksDocument.m */,
-				7FEFBF2A156B619D00C75316 /* BookmarksManager2.h */,
-				7FEFBF2B156B619D00C75316 /* BookmarksManager2.m */,
+				7FEFBF2A156B619D00C75316 /* BookmarksManager.h */,
+				7FEFBF2B156B619D00C75316 /* BookmarksManager.m */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -742,10 +732,8 @@
 				7F1D430D14D1632700A85CB3 /* zxar.c in Sources */,
 				7F1D435714D1F15D00A85CB3 /* BookmarksViewController.m in Sources */,
 				7F7862FC150D4ECD003CFB2E /* AboutViewController.m in Sources */,
-				7FDB346B153F266D00A4AF5F /* BookmarksDocument.m in Sources */,
-				7FDB346E154029B200A4AF5F /* BookmarksManager.m in Sources */,
 				7FDB349F1540D38900A4AF5F /* NSString+RelativePath.m in Sources */,
-				7FEFBF2C156B619D00C75316 /* BookmarksManager2.m in Sources */,
+				7FEFBF2C156B619D00C75316 /* BookmarksManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

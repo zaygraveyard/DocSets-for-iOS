@@ -13,7 +13,7 @@
 #import "DocSetViewController.h"
 #import "DocSet.h"
 #import "DocSetDownloadManager.h"
-#import "BookmarksManager2.h"
+#import "BookmarksManager.h"
 
 @interface DocSetsAppDelegate ()
 
@@ -48,7 +48,7 @@
 	
 	[self restoreInterfaceState];
 	
-	[BookmarksManager2 sharedBookmarksManager];
+	[BookmarksManager sharedBookmarksManager];
 	
     return YES;
 }

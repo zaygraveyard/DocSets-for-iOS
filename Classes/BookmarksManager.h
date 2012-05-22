@@ -1,42 +1,28 @@
 //
-//  BookmarksManager.h
+//  BookmarksManager2.h
 //  DocSets
 //
-//  Created by Ole Zorn on 19.04.12.
+//  Created by Ole Zorn on 22.05.12.
 //  Copyright (c) 2012 omz:software. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "BookmarksDocument.h"
+#import <UIKit/UIKit.h>
 
-#define BookmarksDidUpdateNotification		@"BookmarksDidUpdateNotification"
+#define BookmarksManagerDidLoadBookmarksNotification	@"BookmarksManagerDidLoadBookmarksNotification"
 
-@class BookmarksDocument, DocSet;
+@class DocSet;
 
-@interface BookmarksManager : NSObject <BookmarksDocumentDelegate> {
-	
-	BookmarksDocument *_document;
-	NSMetadataQuery *_query;
-	
-	BOOL _bookmarksAvailable;
-	BOOL _bookmarksEditable;
-	
-	BOOL isResolvingConflict;
-}
+@interface BookmarksManager : NSObject
 
-@property (nonatomic, strong) BookmarksDocument *document;
-@property (nonatomic, strong) NSMetadataQuery *query;
-
-@property (nonatomic, assign) BOOL bookmarksAvailable;
-@property (nonatomic, assign) BOOL bookmarksEditable;
+@property (strong) NSMutableDictionary *bookmarks;
 
 + (id)sharedBookmarksManager;
 
 - (NSMutableArray *)bookmarksForDocSet:(DocSet *)docSet;
+- (NSURL *)URLForBookmark:(NSDictionary *)bookmark inDocSet:(DocSet *)docSet;
+- (NSURL *)webURLForBookmark:(NSDictionary *)bookmark inDocSet:(DocSet *)docSet;
 - (BOOL)addBookmarkWithURL:(NSString *)bookmarkURL title:(NSString *)bookmarkTitle subtitle:(NSString *)subtitle forDocSet:(DocSet *)docSet;
 - (BOOL)deleteBookmarkAtIndex:(NSInteger)bookmarkIndex fromDocSet:(DocSet *)docSet;
 - (BOOL)moveBookmarkAtIndex:(NSInteger)fromIndex inDocSet:(DocSet *)docSet toIndex:(NSInteger)toIndex;
-- (NSURL *)URLForBookmark:(NSDictionary *)bookmark inDocSet:(DocSet *)docSet;
-- (NSURL *)webURLForBookmark:(NSDictionary *)bookmark inDocSet:(DocSet *)docSet;
 
 @end

@@ -1,8 +1,8 @@
 //
-//  BookmarksManager.m
+//  BookmarksManager2.m
 //  DocSets
 //
-//  Created by Ole Zorn on 19.04.12.
+//  Created by Ole Zorn on 22.05.12.
 //  Copyright (c) 2012 omz:software. All rights reserved.
 //
 
@@ -10,33 +10,48 @@
 #import "DocSet.h"
 #import "NSString+RelativePath.h"
 
-//TODO: Add local bookmarks (if present) when enabling iCloud
+//TODO: Save bookmarks locally when iCloud is not available
+//TODO: Check if iCloud is available every time the app is activated (and act accordingly, switch to local bookmarks seemlessly, etc.)
+//TODO: Test import of legacy bookmarks
+//TODO: Don't allow duplicate bookmarks (move to the top when added instead)
 
-//TODO: Don't add duplicate bookmarks (move to top instead)
+@interface BookmarksManager ()
 
-//TODO: Add a bookmarks button in the DocSetViewController on iPhone
+@property (nonatomic, strong) NSMetadataQuery *query;
+@property (strong) NSDate *bookmarksModificationDate;
+@property (assign) BOOL movingToUbiquityContainer;
 
-//TODO: Legacy bookmarks should also be merged when opening an existing document
-//      (in case the app was updated on another device, so that an iCloud document is already there).
+- (void)postChangeNotification;
+- (void)resolveConflictAtURL:(NSURL *)fileURL;
+- (NSData *)dataFromBookmarks:(NSMutableDictionary *)bookmarksDict error:(NSError *__autoreleasing *)outError;
+- (NSString *)relativeBookmarkPathWithBookmarkURL:(NSString *)bookmarkURL inDocSetWithPath:(NSString *)docSetPath;
+- (NSMutableDictionary *)legacyBookmarks;
+- (void)removeLegacyBookmarks;
 
+@end
 
 @implementation BookmarksManager
 
-@synthesize document=_document, query=_query;
-@synthesize bookmarksAvailable=_bookmarksAvailable, bookmarksEditable=_bookmarksEditable;
+@synthesize query=_query, bookmarks=_bookmarks, bookmarksModificationDate=_bookmarksModificationDate, movingToUbiquityContainer=_movingToUbiquityContainer;
 
 - (id)init
 {
 	self = [super init];
 	if (self) {
 		
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(iCloudFileListReceived:) name:NSMetadataQueryDidFinishGatheringNotification object:nil];
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(iCloudFileListReceived:) name:NSMetadataQueryDidUpdateNotification object:nil];
+		//TODO: Check if iCloud is enabled... (otherwise, don't start a metadata query)
 		
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(documentStateChanged:) name:UIDocumentStateChangedNotification object:nil];
+		_query = [[NSMetadataQuery alloc] init];
+		[_query setSearchScopes:[NSArray arrayWithObjects:NSMetadataQueryUbiquitousDataScope, nil]];
+		[_query setPredicate:[NSPredicate predicateWithFormat:@"%K == 'Bookmarks.plist'", NSMetadataItemFSNameKey]];
+		
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(iCloudFileListReceived:) name:NSMetadataQueryDidFinishGatheringNotification object:_query];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(iCloudFileListReceived:) name:NSMetadataQueryDidUpdateNotification object:_query];
 		
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+		
+		[_query startQuery];
 	}
 	return self;
 }
@@ -51,72 +66,297 @@
 	return sharedManager;
 }
 
-- (void)applicationDidBecomeActive:(NSNotification *)notification
+- (void)iCloudFileListReceived:(NSNotification *)notification
 {
-	[self loadBookmarksIfNeeded];
-}
-
-- (void)loadBookmarksIfNeeded
-{
-	if (self.query) {
-		return;
-	}
+	[self.query disableUpdates];
 	
-	NSURL *ubiquityContainerURL = [[NSFileManager defaultManager] URLForUbiquityContainerIdentifier:nil];
-	BOOL iCloudAvailable = (ubiquityContainerURL != nil);
-	BOOL iCloudWasAvailable = [[NSUserDefaults standardUserDefaults] boolForKey:@"iCloudAvailable"];
-	BOOL iCloudAvailabilityChanged = (iCloudAvailable != iCloudWasAvailable);
-	if (iCloudAvailabilityChanged) {
-		//NSLog(@"iCloud availability changed!");
-		[[NSUserDefaults standardUserDefaults] setBool:iCloudAvailable forKey:@"iCloudAvailable"];
-	}
-	
-	if (self.document && !iCloudAvailabilityChanged) {
-		//Nothing changed and bookmarks are already loaded.
-		return;
-	}
-	
-	if (iCloudAvailabilityChanged || !self.document) {
-		//Either bookmarks aren't loaded yet (directly after launch), or iCloud was enabled/disabled.
-		if (iCloudAvailable) {
-			//NSLog(@"iCloud is available, locating bookmarks...");
-			//Start metadata query and open/create the document when it has results:
-			self.bookmarksAvailable = NO;
-			self.bookmarksEditable = NO;
-			self.document.delegate = nil;
-			self.document = nil;
-			[self locateAndOpenDocumentInCloud];
-		} else {
-			//NSLog(@"iCloud is not available, using local document.");
-			self.bookmarksAvailable = NO;
-			self.bookmarksEditable = NO;
-			self.document.delegate = nil;
-			self.document = nil;
-			NSString *documentsDirectoryPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES ) objectAtIndex:0];
-			NSURL *localDocumentsDirectoryURL = [NSURL fileURLWithPath:documentsDirectoryPath];
-			NSString *filename = @"Bookmarks.docsetsbm";
-			NSURL *localDocumentFileURL = [localDocumentsDirectoryURL URLByAppendingPathComponent:filename];
-			if ([[NSFileManager defaultManager] fileExistsAtPath:localDocumentFileURL.path]) {
-				self.document = [[BookmarksDocument alloc] initWithFileURL:localDocumentFileURL];
-				self.document.delegate = self;
-				[self.document openWithCompletionHandler:^(BOOL success) {
-					//NSLog(@"Opened existing local document: %i", success);
-					self.bookmarksAvailable = success;
-					self.bookmarksEditable = success;
-				}];
+	NSArray *queryResults = [self.query results];
+	if (queryResults.count == 0) {
+		if (!self.movingToUbiquityContainer) {
+			self.movingToUbiquityContainer = YES;
+			NSFileManager *fm = [[NSFileManager alloc] init];
+			
+			NSMutableDictionary *legacyBookmarks = [self legacyBookmarks];
+			if (legacyBookmarks.count > 0) {
+				self.bookmarks = legacyBookmarks;
+				[self removeLegacyBookmarks];
 			} else {
-				//NSLog(@"Creating new local document...");
-				[self makeNewDocumentAndMoveToCloud:NO];
+				self.bookmarks = [NSMutableDictionary dictionary];
+			}
+			
+			NSData *bookmarksData = [self dataFromBookmarks:self.bookmarks error:NULL];
+			
+			NSURL *localDocumentsURL = [[fm URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0];
+			NSURL *tempBookmarksURL = [localDocumentsURL URLByAppendingPathComponent:@"TempBookmarks.plist"];
+			[bookmarksData writeToURL:tempBookmarksURL atomically:YES];
+			
+			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+				NSURL *ubiquityContainerURL = [fm URLForUbiquityContainerIdentifier:nil];
+				NSError *setUbiquitousError = nil;
+				NSURL *destinationURL = [ubiquityContainerURL URLByAppendingPathComponent:@"Bookmarks.plist"];
+				BOOL success = [fm setUbiquitous:YES itemAtURL:tempBookmarksURL destinationURL:destinationURL error:&setUbiquitousError];
+				if (!success) {
+					NSLog(@"Could not move bookmarks to ubiquity container (iCloud): %@", setUbiquitousError);
+					[fm removeItemAtURL:tempBookmarksURL error:NULL];
+				}
+				self.movingToUbiquityContainer = NO;
+			});
+		}
+	} else {
+		NSMetadataItem *metadataItem = [queryResults objectAtIndex:0];
+		NSDate *modificationDate = [metadataItem valueForAttribute:NSMetadataItemFSContentChangeDateKey];
+		NSURL *fileURL = [metadataItem valueForAttribute:NSMetadataItemURLKey];
+		
+		NSArray *conflictVersions = [NSFileVersion otherVersionsOfItemAtURL:fileURL];
+		if (conflictVersions.count > 0) {
+			[self resolveConflictAtURL:fileURL];
+		} else {
+			if (![modificationDate isEqual:self.bookmarksModificationDate]) {
+				self.bookmarksModificationDate = modificationDate;
+				
+				dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+					NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
+					NSError *coordinatorError = nil;
+					[coordinator coordinateReadingItemAtURL:fileURL options:0 error:&coordinatorError byAccessor:^(NSURL *newURL) {
+						NSData *bookmarksData = [NSData dataWithContentsOfURL:newURL];
+						if (bookmarksData) {
+							NSMutableDictionary *loadedBookmarks = [NSPropertyListSerialization propertyListWithData:bookmarksData options:NSPropertyListMutableContainers format:NULL error:NULL];
+							if (loadedBookmarks) {
+								self.bookmarks = loadedBookmarks;
+								[self postChangeNotification];
+							}
+						}
+					}];
+					if (coordinatorError) {
+						NSLog(@"Error while trying to coordinate reading bookmarks from ubiquity container: %@", coordinatorError);
+						self.bookmarksModificationDate = nil;
+					}
+				});
 			}
 		}
 	}
+	
+	[self.query enableUpdates];
+}
+
+- (NSData *)dataFromBookmarks:(NSMutableDictionary *)bookmarksDict error:(NSError *__autoreleasing *)outError
+{
+	return [NSPropertyListSerialization dataWithPropertyList:bookmarksDict format:NSPropertyListBinaryFormat_v1_0 options:0 error:outError];
+}
+
+- (NSMutableDictionary *)mergedBookmarksFromVersions:(NSArray *)bookmarksVersions
+{
+	//Merge multiple versions of the bookmarks by forming a union of all bookmarks in all versions.
+	//NOTE: This will cause bookmarks that were deleted in just one version to re-appear, 
+	//      but this is better than having added bookmarks disappear.
+	
+	NSMutableDictionary *mergedBookmarks = [NSMutableDictionary dictionary];
+	
+	NSMutableSet *allDocSetBundleIDs = [NSMutableSet set];
+	for (NSMutableDictionary *bookmarksVersion in bookmarksVersions) {
+		[allDocSetBundleIDs addObjectsFromArray:[bookmarksVersion allKeys]];
+	}
+	for (NSString *bundleID in allDocSetBundleIDs) {
+		NSMutableSet *allBookmarkPaths = [NSMutableSet set];
+		NSMutableArray *mergedBookmarksForBundleID = [NSMutableArray array];
+		for (NSMutableDictionary *bookmarksVersion in bookmarksVersions) {
+			NSMutableArray *bookmarksForBundleID = [bookmarksVersion objectForKey:bundleID];
+			for (NSDictionary *bookmark in [bookmarksForBundleID reverseObjectEnumerator]) {
+				NSString *bookmarkPath = [bookmark objectForKey:@"path"];
+				if (![allBookmarkPaths containsObject:bookmarkPath]) {
+					[allBookmarkPaths addObject:bookmarkPath];
+					[mergedBookmarksForBundleID insertObject:bookmark atIndex:0];
+				}
+			}
+		}
+		[mergedBookmarks setObject:mergedBookmarksForBundleID forKey:bundleID];
+	}
+	return mergedBookmarks;
+}
+
+- (void)resolveConflictAtURL:(NSURL *)fileURL
+{
+	NSArray *conflictVersions = [NSFileVersion otherVersionsOfItemAtURL:fileURL];
+	NSMutableArray *allVersions = [NSMutableArray arrayWithArray:conflictVersions];
+	NSFileVersion *currentVersion = [NSFileVersion currentVersionOfItemAtURL:fileURL];
+	if (currentVersion) {
+		[allVersions insertObject:currentVersion atIndex:0];
+	}
+	
+	//Read the bookmarks dictionary from all versions:
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		NSMutableArray *bookmarksVersions = [NSMutableArray array];
+		for (NSFileVersion *conflictVersion in allVersions) {
+			NSURL *versionURL = conflictVersion.URL;
+			if (versionURL) {
+				NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
+				[coordinator coordinateReadingItemAtURL:versionURL options:0 error:NULL byAccessor:^(NSURL *newURL) {
+					NSData *data = [NSData dataWithContentsOfURL:versionURL];
+					if (data) {
+						NSMutableDictionary *bookmarks = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListMutableContainers format:NULL error:NULL];
+						if (bookmarks) {
+							[bookmarksVersions addObject:bookmarks];
+						}
+					}
+				}];
+			}
+		}
+		
+		//Merge all the versions into one dictionary:
+		NSMutableDictionary *mergedBookmarks = [self mergedBookmarksFromVersions:bookmarksVersions];
+		
+		//Write the dictionary to the document's file URL:
+		NSFileCoordinator *writeCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
+		[writeCoordinator coordinateWritingItemAtURL:fileURL options:NSFileCoordinatorWritingForReplacing error:NULL byAccessor:^(NSURL *newURL) {
+			NSData *mergedBookmarksData = [self dataFromBookmarks:mergedBookmarks error:NULL];
+			if (mergedBookmarksData) {
+				[mergedBookmarksData writeToURL:newURL atomically:YES];
+			}
+		}];
+		
+		//Remove the conflict versions and mark all conflicts as resolved:
+		[NSFileVersion removeOtherVersionsOfItemAtURL:fileURL error:NULL];
+		NSArray *remainingConflictVersions = [NSFileVersion unresolvedConflictVersionsOfItemAtURL:fileURL];
+		for (NSFileVersion* fileVersion in remainingConflictVersions) {
+			fileVersion.resolved = YES;
+		}
+		self.bookmarks = mergedBookmarks;
+		
+		//Finished resolving conflict.
+		[self postChangeNotification];
+	});
+}
+
+- (void)saveBookmarks
+{
+	NSFileManager *fm = [[NSFileManager alloc] init];
+	NSData *bookmarksData = [self dataFromBookmarks:self.bookmarks error:NULL];
+	NSURL *ubiquityContainerURL = [fm URLForUbiquityContainerIdentifier:nil];
+	NSURL *destinationURL = [ubiquityContainerURL URLByAppendingPathComponent:@"Bookmarks.plist"];
+	
+	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+		NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
+		NSError *coordinatorError = nil;
+		[coordinator coordinateWritingItemAtURL:destinationURL options:0 error:&coordinatorError byAccessor:^(NSURL *newURL) {
+			[bookmarksData writeToURL:newURL atomically:YES];
+			//TODO: Update modification date
+		}];
+		if (coordinatorError) {
+			NSLog(@"Error while trying to coordinate writing bookmarks in ubiquity container: %@", coordinatorError);
+		}
+	});
+}
+
+- (void)postChangeNotification
+{
+	//Ensure that notifications for the UI are delivered on the main thread:
+	dispatch_async(dispatch_get_main_queue(), ^{
+		[[NSNotificationCenter defaultCenter] postNotificationName:BookmarksManagerDidLoadBookmarksNotification object:self];
+	});
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification
+{
+	//TODO: Check if iCloud availability changed...
+	[self.query enableUpdates];
 }
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification
 {
+	[self.query disableUpdates];
 }
 
-#pragma mark - Data Migration
+#pragma mark -
+
+- (NSMutableArray *)bookmarksForDocSet:(DocSet *)docSet
+{
+	if (!self.bookmarks) return nil;
+	NSMutableArray *bookmarksForDocSet = [self.bookmarks objectForKey:docSet.bundleID];
+	if (!bookmarksForDocSet) {
+		bookmarksForDocSet = [NSMutableArray array];
+		[self.bookmarks setObject:bookmarksForDocSet forKey:docSet.bundleID];
+		[self saveBookmarks];
+	}
+	return bookmarksForDocSet;
+}
+
+- (BOOL)addBookmarkWithURL:(NSString *)bookmarkURL title:(NSString *)bookmarkTitle subtitle:(NSString *)subtitle forDocSet:(DocSet *)docSet
+{
+	if (!self.bookmarks) return NO;
+	
+	NSString *relativePath = [self relativeBookmarkPathWithBookmarkURL:bookmarkURL inDocSetWithPath:docSet.path];
+	
+	//TODO: Move bookmark to the top if one with the same path already exists...
+	
+	NSMutableArray *bookmarksForDocSet = [self.bookmarks objectForKey:docSet.bundleID];
+	if (!bookmarksForDocSet) {
+		bookmarksForDocSet = [NSMutableArray array];
+		[self.bookmarks setObject:bookmarksForDocSet forKey:docSet.bundleID];
+	}
+	
+	NSDictionary *bookmark = [NSDictionary dictionaryWithObjectsAndKeys:relativePath, @"path", bookmarkTitle, @"title", subtitle, @"subtitle", nil];
+	[bookmarksForDocSet insertObject:bookmark atIndex:0];
+	[self saveBookmarks];
+	
+	return YES;
+}
+
+- (NSString *)relativeBookmarkPathWithBookmarkURL:(NSString *)bookmarkURL inDocSetWithPath:(NSString *)docSetPath
+{
+	NSString *fragment = [[NSURL URLWithString:bookmarkURL] fragment];
+	if (!fragment) fragment = @"";
+	NSString *bookmarkPath = [[NSURL URLWithString:bookmarkURL] path];
+	NSString *relativePath = [bookmarkPath relativePathFromBaseDirPath:docSetPath];
+	if (fragment.length > 0) {
+		relativePath = [relativePath stringByAppendingFormat:@"#%@", fragment];
+	}
+	return relativePath;
+}
+
+- (NSURL *)URLForBookmark:(NSDictionary *)bookmark inDocSet:(DocSet *)docSet
+{
+	NSString *relativeBookmarkPath = [bookmark objectForKey:@"path"];
+	NSString *docSetPath = docSet.path;
+	NSString *bookmarkURLString = [[[NSURL fileURLWithPath:docSetPath] absoluteString] stringByAppendingString:relativeBookmarkPath];
+	if ([bookmarkURLString rangeOfString:@"__cached__"].location != NSNotFound) {
+		bookmarkURLString = [bookmarkURLString stringByReplacingOccurrencesOfString:@"__cached__" withString:@""];
+	}
+	NSURL *bookmarkURL = [NSURL URLWithString:bookmarkURLString];
+	return bookmarkURL;
+}
+
+- (NSURL *)webURLForBookmark:(NSDictionary *)bookmark inDocSet:(DocSet *)docSet
+{
+	NSURL *localBookmarkURL = [self URLForBookmark:bookmark inDocSet:docSet];
+	return [docSet webURLForLocalURL:localBookmarkURL];
+}
+
+- (BOOL)deleteBookmarkAtIndex:(NSInteger)bookmarkIndex fromDocSet:(DocSet *)docSet
+{
+	if (!self.bookmarks) return NO;
+	NSMutableArray *bookmarks = [self bookmarksForDocSet:docSet];
+	[bookmarks removeObjectAtIndex:bookmarkIndex];
+	[self saveBookmarks];
+	return YES;
+}
+
+- (BOOL)moveBookmarkAtIndex:(NSInteger)fromIndex inDocSet:(DocSet *)docSet toIndex:(NSInteger)toIndex
+{
+	if (!self.bookmarks) return NO;
+	
+	NSMutableArray *bookmarks = [self.bookmarks objectForKey:docSet.bundleID];
+	NSDictionary *movedBookmark = [bookmarks objectAtIndex:fromIndex];
+	[bookmarks removeObjectAtIndex:fromIndex];
+	if (toIndex >= [bookmarks count]) {
+		[bookmarks addObject:movedBookmark];
+	} else {
+		[bookmarks insertObject:movedBookmark atIndex:toIndex];
+	}
+	[self saveBookmarks];
+	return YES;
+}
+
+#pragma mark - Legacy Bookmark Migration
 
 - (NSMutableDictionary *)legacyBookmarks
 {
@@ -166,322 +406,5 @@
 	}
 }
 
-#pragma mark - Bookmarks Document Management
-
-- (void)locateAndOpenDocumentInCloud
-{
-	if (!self.query) {
-		self.query = [[NSMetadataQuery alloc] init];
-		[_query setSearchScopes:[NSArray arrayWithObjects:NSMetadataQueryUbiquitousDocumentsScope, nil]];
-		[_query setPredicate:[NSPredicate predicateWithFormat:@"%K == 'Bookmarks.docsetsbm'", NSMetadataItemFSNameKey]];
-		[_query startQuery];
-	}
-}
-
-- (void)iCloudFileListReceived:(NSNotification *)notification
-{
-	if (notification.object != self.query) return;
-	
-	//NSLog(@"File list received");
-	[self.query disableUpdates];
-	NSArray *queryResults = [self.query results];
-	if (queryResults.count == 0 && !self.document) {
-		//NSLog(@"  No document found in iCloud, create a new one...");
-		//Create new document...
-		[self makeNewDocumentAndMoveToCloud:YES];
-	} else {
-		if (!self.document) {
-			//Open document...
-			NSMetadataItem *metadataItem = [queryResults objectAtIndex:0];
-			NSURL *fileURL = [metadataItem valueForAttribute:NSMetadataItemURLKey];
-			//NSLog(@"  Existing document found in iCloud: %@", fileURL);
-			self.document = [[BookmarksDocument alloc] initWithFileURL:fileURL];
-			self.document.delegate = self;
-			[self.document openWithCompletionHandler:^(BOOL success) {
-				self.bookmarksAvailable = success;
-				self.bookmarksEditable = success;
-				if (!success) {
-					//NSLog(@"   Could not open bookmarks document in iCloud");
-				}
-			}];
-		}
-	}
-	self.query = nil;
-	//[self.query enableUpdates];
-}
-
-- (void)makeNewDocumentAndMoveToCloud:(BOOL)moveToCloud
-{
-	NSString *documentsDirectoryPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES ) objectAtIndex:0];
-	NSURL *localDocumentsDirectoryURL = [NSURL fileURLWithPath:documentsDirectoryPath];
-	
-	NSString *filename = @"Bookmarks.docsetsbm";
-	NSString *tempFileName = @"Temp.docsetsbm";
-	
-	NSURL *localDocumentFileURL = [localDocumentsDirectoryURL URLByAppendingPathComponent:(moveToCloud) ? tempFileName : filename];
-	
-	if (moveToCloud) {
-		[[NSFileManager defaultManager] removeItemAtURL:localDocumentFileURL error:NULL];
-	}
-	
-	BookmarksDocument *newDocument = [[BookmarksDocument alloc] initWithFileURL:localDocumentFileURL];
-	newDocument.bookmarks = [self legacyBookmarks];
-	[self removeLegacyBookmarks];
-	
-	[newDocument saveToURL:newDocument.fileURL forSaveOperation:UIDocumentSaveForCreating completionHandler:^(BOOL success) {
-		if (success && moveToCloud) {
-			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-				NSFileManager *fm = [NSFileManager new];
-				NSURL *ubiquityDocumentsURL = [[fm URLForUbiquityContainerIdentifier:nil] URLByAppendingPathComponent:@"Documents"];
-				NSURL *destinationURL = [ubiquityDocumentsURL URLByAppendingPathComponent:filename];
-				
-				NSError *setUbiquitousError = nil;
-				BOOL successfullyMovedToCloud = [fm setUbiquitous:YES itemAtURL:newDocument.fileURL destinationURL:destinationURL error:&setUbiquitousError];
-				if (!successfullyMovedToCloud) {
-					if (setUbiquitousError.code == NSFileWriteFileExistsError) {
-						//NSLog(@"Document already exists, trying to open...");
-						//The iCloud document already exists, try to open it:
-						self.document.delegate = nil;
-						self.document = nil;
-						self.document = [[BookmarksDocument alloc] initWithFileURL:destinationURL];
-						self.document.delegate = self;
-						[self.document openWithCompletionHandler:^(BOOL success) {
-							//NSLog(@"  document opened.");
-							self.bookmarksAvailable = success;
-							self.bookmarksEditable = success;
-							if (!success) {
-								NSLog(@"Could not open bookmarks document");
-							}
-						}];
-					} else {
-						NSLog(@"Unhandled error while trying to move document to iCloud: %@", setUbiquitousError);
-					}
-				} else {
-					dispatch_async(dispatch_get_main_queue(), ^{
-						self.document = newDocument;
-						self.document.delegate = self;
-						[self.document openWithCompletionHandler:^(BOOL success) {
-							self.bookmarksAvailable = success;
-							self.bookmarksEditable = success;
-							if (!success) {
-								NSLog(@"Could not open bookmarks document");
-							}
-						}];
-					});
-				}
-			});
-		} else if (success && !moveToCloud) {
-			self.document = newDocument;
-			self.document.delegate = self;
-			self.bookmarksAvailable = YES;
-			self.bookmarksEditable = YES;
-			[self.document openWithCompletionHandler:nil];
-		} else if (!success) {
-			NSLog(@"Could not create bookmarks document");
-		}
-	}];
-}
-
-- (void)documentStateChanged:(NSNotification *)notification
-{
-	if (notification.object == self.document) {
-		UIDocumentState state = self.document.documentState;
-		//NSLog(@"Document state changed: %i", state);
-		if (state == UIDocumentStateNormal) {
-			self.bookmarksAvailable = YES;
-			self.bookmarksEditable = YES;
-		} else {
-			if (state & UIDocumentStateEditingDisabled) {
-				self.bookmarksEditable = NO;
-			} else {
-				self.bookmarksEditable = YES;
-			}
-			if (state & UIDocumentStateClosed) {
-				self.bookmarksAvailable = NO;
-				self.bookmarksEditable = NO;
-			}
-			if (state & UIDocumentStateSavingError) {
-				//Document was probably deleted from iCloud.
-				self.document.delegate = nil;
-				self.document = nil;
-				self.bookmarksAvailable = NO;
-				self.bookmarksEditable = NO;
-				if (self.query) {
-					[self.query disableUpdates];
-					self.query = nil;
-				}
-				[self loadBookmarksIfNeeded];
-			}
-			if (state & UIDocumentStateInConflict) {
-				if (!isResolvingConflict) {
-					[self resolveConflict];
-				}
-			}
-		}
-	}
-}
-
-- (void)resolveConflict
-{
-	//NSLog(@"Resolving version conflict...");
-	//Set a flag, so that multiple state changed notifications don't result in starting the conflict resolution multiple times.
-	isResolvingConflict = YES;
-	
-	//Gather all versions, including the current one:
-	NSArray *conflictVersions = [NSFileVersion otherVersionsOfItemAtURL:self.document.fileURL];
-	NSMutableArray *allVersions = [NSMutableArray arrayWithArray:conflictVersions];
-	NSFileVersion *currentVersion = [NSFileVersion currentVersionOfItemAtURL:self.document.fileURL];
-	if (currentVersion) {
-		[allVersions insertObject:currentVersion atIndex:0];
-	}
-	
-	//Read the bookmarks dictionary from all versions:
-	dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-		NSMutableArray *bookmarksVersions = [NSMutableArray array];
-		for (NSFileVersion *conflictVersion in allVersions) {
-			NSURL *versionURL = conflictVersion.URL;
-			if (versionURL) {
-				NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
-				[coordinator coordinateReadingItemAtURL:versionURL options:0 error:NULL byAccessor:^(NSURL *newURL) {
-					NSData *data = [NSData dataWithContentsOfURL:versionURL];
-					if (data) {
-						NSMutableDictionary *bookmarks = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListMutableContainers format:NULL error:NULL];
-						if (bookmarks) {
-							[bookmarksVersions addObject:bookmarks];
-						}
-					}
-				}];
-			}
-		}
-		
-		//Merge all the versions into one dictionary:
-		NSMutableDictionary *mergedBookmarks = [BookmarksDocument mergedBookmarksFromVersions:bookmarksVersions];
-		
-		//Write the dictionary to the document's file URL:
-		NSFileCoordinator *writeCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
-		[writeCoordinator coordinateWritingItemAtURL:self.document.fileURL options:NSFileCoordinatorWritingForReplacing error:NULL byAccessor:^(NSURL *newURL) {
-			NSData *mergedBookmarksData = [BookmarksDocument dataFromBookmarks:mergedBookmarks error:NULL];
-			if (mergedBookmarksData) {
-				[mergedBookmarksData writeToURL:newURL atomically:YES];
-			}
-		}];
-		
-		//Remove the conflict versions and mark all conflicts as resolved:
-		[NSFileVersion removeOtherVersionsOfItemAtURL:self.document.fileURL error:NULL];
-		NSArray *remainingConflictVersions = [NSFileVersion unresolvedConflictVersionsOfItemAtURL:self.document.fileURL];
-		for (NSFileVersion* fileVersion in remainingConflictVersions) {
-			fileVersion.resolved = YES;
-		}
-		//Finished resolving conflict.
-		isResolvingConflict = NO;
-	});	
-}
-
-- (void)bookmarksDocumentDidLoad:(BookmarksDocument *)document
-{
-	[[NSNotificationCenter defaultCenter] postNotificationName:BookmarksDidUpdateNotification object:self userInfo:nil];
-}
-
-#pragma mark - Accessing and Editing Bookmarks
-
-- (NSMutableArray *)bookmarksForDocSet:(DocSet *)docSet
-{
-	if (!self.document) return nil;
-	NSMutableArray *bookmarksForDocSet = [self.document.bookmarks objectForKey:docSet.bundleID];
-	if (!bookmarksForDocSet) {
-		bookmarksForDocSet = [NSMutableArray array];
-		[self.document.bookmarks setObject:bookmarksForDocSet forKey:docSet.bundleID];
-		[self.document updateChangeCount:UIDocumentChangeDone];
-	}
-	return bookmarksForDocSet;
-}
-
-- (BOOL)addBookmarkWithURL:(NSString *)bookmarkURL title:(NSString *)bookmarkTitle subtitle:(NSString *)subtitle forDocSet:(DocSet *)docSet
-{
-	if (!self.document || !self.bookmarksEditable) {
-		return NO;
-	}
-	
-	NSString *relativePath = [self relativeBookmarkPathWithBookmarkURL:bookmarkURL inDocSetWithPath:docSet.path];
-				
-	//TODO: Move bookmark to the top if one with the same path already exists...
-	
-	NSMutableArray *bookmarksForDocSet = [self.document.bookmarks objectForKey:docSet.bundleID];
-	if (!bookmarksForDocSet) {
-		bookmarksForDocSet = [NSMutableArray array];
-		[self.document.bookmarks setObject:bookmarksForDocSet forKey:docSet.bundleID];
-	}
-	
-	NSDictionary *bookmark = [NSDictionary dictionaryWithObjectsAndKeys:relativePath, @"path", bookmarkTitle, @"title", subtitle, @"subtitle", nil];
-	[bookmarksForDocSet insertObject:bookmark atIndex:0];
-	[self.document updateChangeCount:UIDocumentChangeDone];
-	
-	return YES;
-}
-
-- (NSString *)relativeBookmarkPathWithBookmarkURL:(NSString *)bookmarkURL inDocSetWithPath:(NSString *)docSetPath
-{
-	NSString *fragment = [[NSURL URLWithString:bookmarkURL] fragment];
-	if (!fragment) fragment = @"";
-	NSString *bookmarkPath = [[NSURL URLWithString:bookmarkURL] path];
-	NSString *relativePath = [bookmarkPath relativePathFromBaseDirPath:docSetPath];
-	if (fragment.length > 0) {
-		relativePath = [relativePath stringByAppendingFormat:@"#%@", fragment];
-	}
-	return relativePath;
-}
-
-- (NSURL *)URLForBookmark:(NSDictionary *)bookmark inDocSet:(DocSet *)docSet
-{
-	NSString *relativeBookmarkPath = [bookmark objectForKey:@"path"];
-	NSString *docSetPath = docSet.path;
-	NSString *bookmarkURLString = [[[NSURL fileURLWithPath:docSetPath] absoluteString] stringByAppendingString:relativeBookmarkPath];
-	if ([bookmarkURLString rangeOfString:@"__cached__"].location != NSNotFound) {
-		bookmarkURLString = [bookmarkURLString stringByReplacingOccurrencesOfString:@"__cached__" withString:@""];
-	}
-	NSURL *bookmarkURL = [NSURL URLWithString:bookmarkURLString];
-	return bookmarkURL;
-}
-
-- (NSURL *)webURLForBookmark:(NSDictionary *)bookmark inDocSet:(DocSet *)docSet
-{
-	NSURL *localBookmarkURL = [self URLForBookmark:bookmark inDocSet:docSet];
-	return [docSet webURLForLocalURL:localBookmarkURL];
-}
-
-- (BOOL)deleteBookmarkAtIndex:(NSInteger)bookmarkIndex fromDocSet:(DocSet *)docSet
-{
-	if (!self.document || !self.bookmarksEditable) {
-		return NO;
-	}
-	NSMutableArray *bookmarks = [self bookmarksForDocSet:docSet];
-	[bookmarks removeObjectAtIndex:bookmarkIndex];
-	[self.document updateChangeCount:UIDocumentChangeDone];
-	return YES;
-}
-
-- (BOOL)moveBookmarkAtIndex:(NSInteger)fromIndex inDocSet:(DocSet *)docSet toIndex:(NSInteger)toIndex
-{
-	if (!self.document || !self.bookmarksEditable) {
-		return NO;
-	}
-	NSMutableArray *bookmarks = [self.document.bookmarks objectForKey:docSet.bundleID];
-	NSDictionary *movedBookmark = [bookmarks objectAtIndex:fromIndex];
-	[bookmarks removeObjectAtIndex:fromIndex];
-	if (toIndex >= [bookmarks count]) {
-		[bookmarks addObject:movedBookmark];
-	} else {
-		[bookmarks insertObject:movedBookmark atIndex:toIndex];
-	}
-	[self.document updateChangeCount:UIDocumentChangeDone];
-	return YES;
-}
-
-#pragma mark -
-
-- (void)dealloc
-{
-	[[NSNotificationCenter defaultCenter] removeObserver:self];
-}
 
 @end
