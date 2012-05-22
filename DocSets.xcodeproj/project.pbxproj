@@ -93,6 +93,7 @@
 		7FDB346B153F266D00A4AF5F /* BookmarksDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FDB346A153F266D00A4AF5F /* BookmarksDocument.m */; };
 		7FDB346E154029B200A4AF5F /* BookmarksManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FDB346D154029B100A4AF5F /* BookmarksManager.m */; };
 		7FDB349F1540D38900A4AF5F /* NSString+RelativePath.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FDB349E1540D38900A4AF5F /* NSString+RelativePath.m */; };
+		7FEFBF2C156B619D00C75316 /* BookmarksManager2.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FEFBF2B156B619D00C75316 /* BookmarksManager2.m */; };
 		7FF7040512AB0CE3001FF09F /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FF7040412AB0CE3001FF09F /* CoreData.framework */; };
 		7FF706CA12ABE88A001FF09F /* DocSet.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF706C912ABE88A001FF09F /* DocSet.m */; };
 		7FF706D512ABEF76001FF09F /* DocSetViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FF706D412ABEF76001FF09F /* DocSetViewController.m */; };
@@ -244,6 +245,8 @@
 		7FDB346D154029B100A4AF5F /* BookmarksManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarksManager.m; sourceTree = "<group>"; };
 		7FDB349D1540D38800A4AF5F /* NSString+RelativePath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+RelativePath.h"; sourceTree = "<group>"; };
 		7FDB349E1540D38900A4AF5F /* NSString+RelativePath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+RelativePath.m"; sourceTree = "<group>"; };
+		7FEFBF2A156B619D00C75316 /* BookmarksManager2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BookmarksManager2.h; sourceTree = "<group>"; };
+		7FEFBF2B156B619D00C75316 /* BookmarksManager2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BookmarksManager2.m; sourceTree = "<group>"; };
 		7FF7040412AB0CE3001FF09F /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		7FF706C812ABE88A001FF09F /* DocSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocSet.h; sourceTree = "<group>"; };
 		7FF706C912ABE88A001FF09F /* DocSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DocSet.m; sourceTree = "<group>"; };
@@ -444,6 +447,8 @@
 				7FDB346D154029B100A4AF5F /* BookmarksManager.m */,
 				7FDB3469153F266D00A4AF5F /* BookmarksDocument.h */,
 				7FDB346A153F266D00A4AF5F /* BookmarksDocument.m */,
+				7FEFBF2A156B619D00C75316 /* BookmarksManager2.h */,
+				7FEFBF2B156B619D00C75316 /* BookmarksManager2.m */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -740,6 +745,7 @@
 				7FDB346B153F266D00A4AF5F /* BookmarksDocument.m in Sources */,
 				7FDB346E154029B200A4AF5F /* BookmarksManager.m in Sources */,
 				7FDB349F1540D38900A4AF5F /* NSString+RelativePath.m in Sources */,
+				7FEFBF2C156B619D00C75316 /* BookmarksManager2.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

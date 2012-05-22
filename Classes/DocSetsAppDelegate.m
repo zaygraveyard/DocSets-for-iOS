@@ -14,6 +14,7 @@
 #import "DocSet.h"
 #import "DocSetDownloadManager.h"
 #import "BookmarksManager.h"
+#import "BookmarksManager2.h"
 
 @interface DocSetsAppDelegate ()
 
@@ -32,7 +33,6 @@
 	self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
 	
 	[DocSetDownloadManager sharedDownloadManager];
-	
 	self.rootViewController = [[RootViewController alloc] initWithNibName:nil bundle:nil];
 	rootNavigationController = [[UINavigationController alloc] initWithRootViewController:rootViewController];
 	
@@ -50,6 +50,7 @@
 	[self restoreInterfaceState];
 	
 	[BookmarksManager sharedBookmarksManager];
+	[BookmarksManager2 sharedBookmarksManager];
 	
     return YES;
 }

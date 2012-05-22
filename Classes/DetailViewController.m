@@ -13,6 +13,7 @@
 #import "BookmarksViewController.h"
 #import "DocSet.h"
 #import "BookmarksManager.h"
+#import "BookmarksManager2.h"
 
 #define EXTERNAL_LINK_ALERT_TAG	1
 
@@ -254,6 +255,10 @@
 				subtitle = fragmentTitle;
 			}
 			if (bookmarkTitle && bookmarkURL) {
+				BOOL bookmarkAdded2 = [[BookmarksManager2 sharedBookmarksManager] addBookmarkWithURL:bookmarkURL title:bookmarkTitle subtitle:subtitle forDocSet:self.docSet];
+				NSLog(@"2: Added: %i", bookmarkAdded2);
+				
+				
 				BOOL bookmarkAdded = [[BookmarksManager sharedBookmarksManager] addBookmarkWithURL:bookmarkURL title:bookmarkTitle subtitle:subtitle forDocSet:self.docSet];
 				if (!bookmarkAdded) {
 					[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) 

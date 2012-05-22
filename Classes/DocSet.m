@@ -168,7 +168,7 @@
 		NSMutableArray *results = [NSMutableArray array];
 		//Do a simpler prefix search for very short search terms. Otherwise, too many irrelevant results would
 		//clutter the results and most of the relevant results would probably not be returned at all, because
-		//the maxNumberOfResults is already reached...
+		//the maximum number of results is already reached...
 		BOOL prefixSearch = searchTerm.length < 3;
 		for (NSDictionary *token in tokens) {
 			NSString *tokenName = [token objectForKey:@"tokenName"];
