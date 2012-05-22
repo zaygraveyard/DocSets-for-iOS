@@ -11,6 +11,9 @@
 #import "NSString+RelativePath.h"
 #import "BookmarksDocument.h"
 
+//TODO: Save bookmarks locally when iCloud is not available
+//TODO: Import legacy bookmarks
+
 @implementation BookmarksManager2
 
 @synthesize query=_query, bookmarks=_bookmarks, bookmarksModificationDate=_bookmarksModificationDate;
@@ -50,7 +53,12 @@
 			
 			NSLog(@"2: Bookmarks file doesn't exist yet, saving...");
 			NSFileManager *fm = [[NSFileManager alloc] init];
-			//TODO: Merge in local bookmarks and legacy bookmarks...
+			//TODO: Merge in legacy bookmarks...
+			
+			//Discard any bookmarks that are loaded, the user may have deleted the data consciously from iCloud
+			//and it shouldn't make a difference if the app is currently running while the data is deleted.
+			self.bookmarks = [NSMutableDictionary dictionary];
+			
 			NSData *bookmarksData = [BookmarksDocument dataFromBookmarks:self.bookmarks error:NULL];
 			
 			NSURL *localDocumentsURL = [[fm URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0];
@@ -71,6 +79,7 @@
 					//TODO: Check for "file exists" error and try to open in that case...
 					//TODO: Remove local temp file
 				}
+				_movingToUbiquityContainer = NO;
 			});
 		}
 	} else {
