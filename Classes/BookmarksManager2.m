@@ -13,7 +13,7 @@
 
 @implementation BookmarksManager2
 
-@synthesize query=_query, bookmarks=_bookmarks, state=_state, bookmarksModificationDate=_bookmarksModificationDate;
+@synthesize query=_query, bookmarks=_bookmarks, bookmarksModificationDate=_bookmarksModificationDate;
 
 - (id)init
 {
@@ -33,8 +33,6 @@
 		NSURL *ubiquityContainerURL = [[NSFileManager defaultManager] URLForUbiquityContainerIdentifier:nil];
 		NSLog(@"2: Container URL: %@", ubiquityContainerURL);
 		
-		self.state = BookmarksStateUnknown;
-		
 		[_query startQuery];
 	}
 	return self;
@@ -47,8 +45,8 @@
 	NSLog(@"2: ...");
 	NSArray *queryResults = [self.query results];
 	if (queryResults.count == 0) {
-		if (self.state != BookmarksStateInitializing) {
-			self.state = BookmarksStateInitializing;
+		if (!_movingToUbiquityContainer) {
+			_movingToUbiquityContainer = YES;
 			
 			NSLog(@"2: Bookmarks file doesn't exist yet, saving...");
 			NSFileManager *fm = [[NSFileManager alloc] init];
@@ -67,17 +65,15 @@
 				BOOL madeUbiquitous = [fm setUbiquitous:YES itemAtURL:tempBookmarksURL destinationURL:destinationURL error:&setUbiquitousError];
 				
 				if (madeUbiquitous) {
-					self.state = BookmarksStateLoaded;
+					NSLog(@"2: Bookmarks loaded");
 				} else {
 					NSLog(@"2: Error while moving to iCloud container: %@", setUbiquitousError);
 					//TODO: Check for "file exists" error and try to open in that case...
 					//TODO: Remove local temp file
-					self.state = BookmarksStateError;
 				}
 			});
 		}
 	} else {
-		self.state = BookmarksStateLoading;
 		NSMetadataItem *metadataItem = [queryResults objectAtIndex:0];
 		NSDate *modificationDate = [metadataItem valueForAttribute:NSMetadataItemFSContentChangeDateKey];
 		NSURL *fileURL = [metadataItem valueForAttribute:NSMetadataItemURLKey];
@@ -105,21 +101,19 @@
 							NSMutableDictionary *loadedBookmarks = [NSPropertyListSerialization propertyListWithData:bookmarksData options:NSPropertyListMutableContainers format:NULL error:NULL];
 							if (loadedBookmarks) {
 								self.bookmarks = loadedBookmarks;
+								[self postChangeNotification];
 							}
 							NSLog(@"2: Bookmarks loaded: %@", loadedBookmarks);
-							self.state = BookmarksStateLoaded;
 						} else {
 							NSLog(@"2: Could not load bookmarks!");
-							self.state = BookmarksStateError;
 						}
 					}];
 					NSLog(@"2: Done loading");
 					if (coordinatorError) {
 						NSLog(@"    2: %@", coordinatorError);
-						self.state = BookmarksStateError;
 						self.bookmarksModificationDate = nil;
 					} else {
-						self.state = BookmarksStateLoaded;
+						NSLog(@"    2: (no error)");
 					}
 					
 				});
@@ -182,8 +176,9 @@
 		//Finished resolving conflict.
 		
 		self.bookmarks = mergedBookmarks;
+		[self postChangeNotification];
 		
-		NSLog(@"2: Done.");
+		NSLog(@"2: Conflict resolved.");
 		
 	});
 }
@@ -200,9 +195,17 @@
 		NSFileCoordinator *coordinator = [[NSFileCoordinator alloc] initWithFilePresenter:nil];
 		[coordinator coordinateWritingItemAtURL:destinationURL options:0 error:NULL byAccessor:^(NSURL *newURL) {
 			[bookmarksData writeToURL:newURL atomically:YES];
-			NSLog(@"2: ... written.");
 			//TODO: Update modification date
 		}];
+		
+		NSLog(@"2: ... written.");
+	});
+}
+
+- (void)postChangeNotification
+{
+	dispatch_async(dispatch_get_main_queue(), ^{
+		[[NSNotificationCenter defaultCenter] postNotificationName:BookmarksManagerDidLoadBookmarksNotification object:self];
 	});
 }
 

@@ -12,7 +12,6 @@
 #import "SwipeSplitViewController.h"
 #import "BookmarksViewController.h"
 #import "DocSet.h"
-#import "BookmarksManager.h"
 #import "BookmarksManager2.h"
 
 #define EXTERNAL_LINK_ALERT_TAG	1
@@ -57,17 +56,8 @@
 		portraitToolbarItems = [NSArray arrayWithObjects:browseButtonItem, spaceItem, backButtonItem, spaceItem, forwardButtonItem, flexSpace, bookmarksButtonItem, spaceItem, actionButtonItem, spaceItem, outlineButtonItem, nil];
 		landscapeToolbarItems = [NSArray arrayWithObjects:backButtonItem, spaceItem, forwardButtonItem, flexSpace, bookmarksButtonItem, spaceItem, actionButtonItem, spaceItem, outlineButtonItem, nil];
 	}
-	
-	[[BookmarksManager sharedBookmarksManager] addObserver:self forKeyPath:@"bookmarksAvailable" options:NSKeyValueObservingOptionNew context:nil];
 		
 	return self;
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
-{
-	if ([keyPath isEqualToString:@"bookmarksAvailable"]) {
-		bookmarksButtonItem.enabled = [[BookmarksManager sharedBookmarksManager] bookmarksAvailable] && self.docSet != nil;
-	}
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -255,11 +245,7 @@
 				subtitle = fragmentTitle;
 			}
 			if (bookmarkTitle && bookmarkURL) {
-				BOOL bookmarkAdded2 = [[BookmarksManager2 sharedBookmarksManager] addBookmarkWithURL:bookmarkURL title:bookmarkTitle subtitle:subtitle forDocSet:self.docSet];
-				NSLog(@"2: Added: %i", bookmarkAdded2);
-				
-				
-				BOOL bookmarkAdded = [[BookmarksManager sharedBookmarksManager] addBookmarkWithURL:bookmarkURL title:bookmarkTitle subtitle:subtitle forDocSet:self.docSet];
+				BOOL bookmarkAdded = [[BookmarksManager2 sharedBookmarksManager] addBookmarkWithURL:bookmarkURL title:bookmarkTitle subtitle:subtitle forDocSet:self.docSet];
 				if (!bookmarkAdded) {
 					[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) 
 												message:NSLocalizedString(@"Bookmarks are currently being synced. Please try again in a moment.", nil) 
@@ -268,28 +254,6 @@
 									  otherButtonTitles:nil] show];
 				}
 			}
-			
-			/*
-			NSMutableArray *bookmarks = [self.docSet bookmarks];
-			NSDictionary *existingBookmark = nil;
-			NSInteger existingBookmarkIndex = 0;
-			NSInteger i = 0;
-			for (NSDictionary *bookmark in bookmarks) {
-				if ([[bookmark objectForKey:@"URL"] isEqual:currentURLString]) {
-					existingBookmark = bookmark;
-					existingBookmarkIndex = i;
-					break;
-				}
-				i++;
-			}
-			if (existingBookmark) {
-				//if the page is already bookmarked, move it to the top
-				[bookmarks removeObjectAtIndex:existingBookmarkIndex];
-			}
-			NSDictionary *newBookmark = [NSDictionary dictionaryWithObjectsAndKeys:currentURLString, @"URL", bookmarkTitle, @"title", nil];
-			[bookmarks insertObject:newBookmark atIndex:0];
-			[self.docSet saveBookmarks];
-			 */
 		} else {
 			NSURL *webURL = [self.docSet webURLForLocalURL:URL];
 			if (buttonIndex == 1) {
@@ -334,7 +298,8 @@
 - (void)setDocSet:(DocSet *)aDocSet
 {
 	docSet = aDocSet;
-	bookmarksButtonItem.enabled = [[BookmarksManager sharedBookmarksManager] bookmarksAvailable];
+	//bookmarksButtonItem.enabled = [[BookmarksManager sharedBookmarksManager] bookmarksAvailable];
+	bookmarksButtonItem.enabled = YES;
 }
 
 #pragma mark -
@@ -408,7 +373,7 @@
 
 - (void)showBookmark:(NSDictionary *)bookmark
 {
-	NSURL *bookmarkURL = [[BookmarksManager sharedBookmarksManager] URLForBookmark:bookmark inDocSet:self.docSet];
+	NSURL *bookmarkURL = [[BookmarksManager2 sharedBookmarksManager] URLForBookmark:bookmark inDocSet:self.docSet];
 	[self openURL:bookmarkURL withAnchor:nil];
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
 		[bookmarksPopover dismissPopoverAnimated:YES];
@@ -570,7 +535,6 @@
 
 - (void)dealloc 
 {
-	[[BookmarksManager sharedBookmarksManager] removeObserver:self forKeyPath:@"bookmarksAvailable"];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
