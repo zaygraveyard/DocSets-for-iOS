@@ -60,17 +60,9 @@
 {
 	BOOL iCloudEnabled = [[BookmarksManager sharedBookmarksManager] iCloudEnabled];
 	if (iCloudEnabled) {
-		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-			self.navigationItem.rightBarButtonItem = self.syncInfoButtonItem;
-		} else {
-			self.navigationItem.leftBarButtonItem = self.syncInfoButtonItem;
-		}
+		self.navigationItem.leftBarButtonItem = self.syncInfoButtonItem;
 	} else {
-		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
-			self.navigationItem.rightBarButtonItem = nil;
-		} else {
-			self.navigationItem.leftBarButtonItem = nil;
-		}
+		self.navigationItem.leftBarButtonItem = nil;
 	}
 }
 
