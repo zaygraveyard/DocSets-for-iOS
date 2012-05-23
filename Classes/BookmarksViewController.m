@@ -10,11 +10,14 @@
 #import "DetailViewController.h"
 #import "DocSet.h"
 #import "BookmarksManager.h"
+#import "BookmarkSyncLogViewController.h"
 
+#define SYNC_STATUS_ALERT_TAG	1
 
 @implementation BookmarksViewController
 
-@synthesize detailViewController;
+@synthesize syncInfoButtonItem=_syncInfoButtonItem;
+@synthesize delegate=_delegate;
 
 - (id)initWithDocSet:(DocSet *)selectedDocSet
 {
@@ -26,16 +29,73 @@
 		} else {
 			self.contentSizeForViewInPopover = CGSizeMake(320, 480);
 		}
-				
+		
 		UIBarButtonItem *shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareBookmarks:)];
 		UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
 		self.toolbarItems = [NSArray arrayWithObjects:[self editButtonItem], flexSpace, shareItem, nil];
 		
 		docSet = selectedDocSet;
 		
+		UIButton *cloudButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[cloudButton setImage:[UIImage imageNamed:@"CloudLog.png"] forState:UIControlStateNormal];
+		cloudButton.showsTouchWhenHighlighted = YES;
+		cloudButton.frame = CGRectMake(0, 0, 29, 29);
+		[cloudButton addTarget:self action:@selector(showSyncLog:) forControlEvents:UIControlEventTouchUpInside];
+		self.syncInfoButtonItem = [[UIBarButtonItem alloc] initWithCustomView:cloudButton];
+		
+		[[BookmarksManager sharedBookmarksManager] addObserver:self forKeyPath:@"iCloudEnabled" options:NSKeyValueObservingOptionNew context:nil];
+		[self showOrHideSyncLogButton];
+		
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bookmarksDidUpdate:) name:BookmarksManagerDidLoadBookmarksNotification object:nil];
 	}
 	return self;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+	[self showOrHideSyncLogButton];
+}
+
+- (void)showOrHideSyncLogButton
+{
+	BOOL iCloudEnabled = [[BookmarksManager sharedBookmarksManager] iCloudEnabled];
+	if (iCloudEnabled) {
+		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+			self.navigationItem.rightBarButtonItem = self.syncInfoButtonItem;
+		} else {
+			self.navigationItem.leftBarButtonItem = self.syncInfoButtonItem;
+		}
+	} else {
+		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+			self.navigationItem.rightBarButtonItem = nil;
+		} else {
+			self.navigationItem.leftBarButtonItem = nil;
+		}
+	}
+}
+
+- (void)showSyncLog:(id)sender
+{
+	NSString *deviceName = [[BookmarksManager sharedBookmarksManager] lastSavedDeviceName];
+	if (!deviceName) deviceName = NSLocalizedString(@"Unknown Device", nil);
+	NSDate *modifiedDate = [[BookmarksManager sharedBookmarksManager] bookmarksModificationDate];
+	NSString *modifiedDateString = [NSDateFormatter localizedStringFromDate:modifiedDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+	NSString *shortSyncStatus = [NSString stringWithFormat:NSLocalizedString(@"Your bookmarks are synced with iCloud.\n\nLast modified by %@ (%@)", nil), deviceName, modifiedDateString];
+	UIAlertView *statusAlert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"iCloud Sync Status", nil) message:shortSyncStatus delegate:self cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:NSLocalizedString(@"Show Log...", nil), nil];
+	statusAlert.tag = SYNC_STATUS_ALERT_TAG;
+	[statusAlert show];
+}
+
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+	if (alertView.tag == SYNC_STATUS_ALERT_TAG) {
+		if (buttonIndex != alertView.cancelButtonIndex) {
+			BookmarkSyncLogViewController *vc = [[BookmarkSyncLogViewController alloc] initWithStyle:UITableViewStylePlain];
+			vc.title = NSLocalizedString(@"iCloud Sync Log", nil);
+			vc.contentSizeForViewInPopover = self.contentSizeForViewInPopover;
+			[self.navigationController pushViewController:vc animated:YES];
+		}
+	}
 }
 
 - (void)shareBookmarks:(id)sender
