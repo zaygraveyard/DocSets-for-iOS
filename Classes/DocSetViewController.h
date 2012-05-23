@@ -7,10 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BookmarksViewController.h"
 
 @class DocSet, DetailViewController;
 
-@interface DocSetViewController : UITableViewController <UISearchDisplayDelegate> {
+@interface DocSetViewController : UITableViewController <UISearchDisplayDelegate, BookmarksViewControllerDelegate> {
 
 	DetailViewController *detailViewController;
 	DocSet *docSet;

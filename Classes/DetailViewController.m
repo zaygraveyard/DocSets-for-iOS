@@ -229,7 +229,6 @@
 - (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
 {
 	if (buttonIndex != actionSheet.cancelButtonIndex) {
-		
 		NSString *currentURLString = [webView stringByEvaluatingJavaScriptFromString:@"window.location.href"];
 		currentURLString = (__bridge_transfer NSString *)CFURLCreateStringByAddingPercentEscapes(NULL, (__bridge CFStringRef)currentURLString, CFSTR("#"), CFSTR(""), CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
 		NSURL *URL = [NSURL URLWithString:currentURLString];
@@ -276,7 +275,7 @@
 		if (activeSheet.visible) [activeSheet dismissWithClickedButtonIndex:activeSheet.cancelButtonIndex animated:NO];
 		
 		BookmarksViewController *vc = [[BookmarksViewController alloc] initWithDocSet:self.docSet];
-		vc.detailViewController = self;
+		vc.delegate = self;
 		UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:vc];
 		navController.toolbarHidden = NO;
 		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
@@ -371,7 +370,7 @@
 	}
 }
 
-- (void)showBookmark:(NSDictionary *)bookmark
+- (void)bookmarksViewController:(BookmarksViewController *)viewController didSelectBookmark:(NSDictionary *)bookmark
 {
 	NSURL *bookmarkURL = [[BookmarksManager sharedBookmarksManager] URLForBookmark:bookmark inDocSet:self.docSet];
 	[self openURL:bookmarkURL withAnchor:nil];
@@ -383,7 +382,7 @@
 }
 
 - (void)openURL:(NSURL *)URL withAnchor:(NSString *)anchor
-{	
+{
 	if (anchor) {
 		NSURL *URLWithAnchor = [NSURL URLWithString:[[URL absoluteString] stringByAppendingFormat:@"#%@", anchor]];
 		[webView loadRequest:[NSURLRequest requestWithURL:URLWithAnchor]];

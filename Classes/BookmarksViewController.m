@@ -163,11 +163,14 @@
 	
 	NSDictionary *selectedBookmark = [[[BookmarksManager sharedBookmarksManager] bookmarksForDocSet:docSet] objectAtIndex:indexPath.row];
 	
-	[self.detailViewController showBookmark:selectedBookmark];
+	if ([self.delegate respondsToSelector:@selector(bookmarksViewController:didSelectBookmark:)]) {
+		[self.delegate bookmarksViewController:self didSelectBookmark:selectedBookmark];
+	}
 }
 
 - (void)dealloc
 {
+	[[BookmarksManager sharedBookmarksManager] removeObserver:self forKeyPath:@"iCloudEnabled"];
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 

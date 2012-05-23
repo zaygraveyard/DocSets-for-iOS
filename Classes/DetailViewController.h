@@ -7,10 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "BookmarksViewController.h"
 
 @class DocSet, OutlineItem, OutlineViewController;
 
-@interface DetailViewController : UIViewController <UIPopoverControllerDelegate, UISplitViewControllerDelegate, UINavigationControllerDelegate, UIWebViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate> {
+@interface DetailViewController : UIViewController <UIPopoverControllerDelegate, UISplitViewControllerDelegate, UINavigationControllerDelegate, UIWebViewDelegate, UIAlertViewDelegate, UIActionSheetDelegate, BookmarksViewControllerDelegate> {
 
 	UIActionSheet *activeSheet;
 	UIPopoverController *outlinePopover;
@@ -43,7 +44,6 @@
 - (void)showNode:(NSManagedObject *)node inDocSet:(DocSet *)docSet;
 - (void)showToken:(NSDictionary *)tokenInfo inDocSet:(DocSet *)docSet;
 - (void)showOutlineItem:(OutlineItem *)outlineItem;
-- (void)showBookmark:(NSDictionary *)bookmark;
 - (void)openURL:(NSURL *)URL withAnchor:(NSString *)a;
 - (NSString *)bookPathForURL:(NSURL *)URL;
 

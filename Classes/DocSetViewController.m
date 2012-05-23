@@ -9,6 +9,7 @@
 #import "DocSetViewController.h"
 #import "DocSet.h"
 #import "DetailViewController.h"
+#import "BookmarksViewController.h"
 
 #define SEARCH_SPINNER_TAG	1
 
@@ -74,6 +75,11 @@
 	searchDisplayController.delegate = self;
 	searchDisplayController.searchResultsDataSource = self;
 	searchDisplayController.searchResultsDelegate = self;
+	
+	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+		self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemBookmarks target:self action:@selector(showBookmarks:)];
+		self.navigationItem.rightBarButtonItem.style = UIBarButtonItemStylePlain;
+	}
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -363,6 +369,24 @@
 			[self.detailViewController showNode:node inDocSet:docSet];
 		}
 	}
+}
+
+- (void)showBookmarks:(id)sender
+{
+	BookmarksViewController *vc = [[BookmarksViewController alloc] initWithDocSet:self.docSet];
+	vc.delegate = self;
+	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:vc];
+	[self presentModalViewController:navController animated:YES];
+}
+
+- (void)bookmarksViewController:(BookmarksViewController *)viewController didSelectBookmark:(NSDictionary *)bookmark
+{	
+	[viewController dismissModalViewControllerAnimated:YES];
+	DetailViewController *vc = [[DetailViewController alloc] initWithNibName:nil bundle:nil];
+	vc.docSet = self.docSet;
+	[self.navigationController pushViewController:vc animated:YES];
+	[vc loadView];
+	[vc bookmarksViewController:viewController didSelectBookmark:bookmark];
 }
 
 #pragma mark -
