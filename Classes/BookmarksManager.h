@@ -9,12 +9,21 @@
 #import <UIKit/UIKit.h>
 
 #define BookmarksManagerDidLoadBookmarksNotification	@"BookmarksManagerDidLoadBookmarksNotification"
+#define BookmarksManagerDidLogSyncEventNotification		@"BookmarksManagerDidLogSyncEventNotification"
+
+#define kBookmarkSyncLogTitle	@"title"
+#define kBookmarkSyncLogLevel	@"level"
+#define kBookmarkSyncLogDate	@"date"
 
 @class DocSet;
 
 @interface BookmarksManager : NSObject
 
 @property (strong) NSMutableDictionary *bookmarks;
+@property (assign) BOOL iCloudEnabled;
+@property (strong) NSMutableArray *syncLog;
+@property (strong) NSDate *bookmarksModificationDate;
+@property (strong) NSString *lastSavedDeviceName;
 
 + (id)sharedBookmarksManager;
 
@@ -24,5 +33,7 @@
 - (BOOL)addBookmarkWithURL:(NSString *)bookmarkURL title:(NSString *)bookmarkTitle subtitle:(NSString *)subtitle forDocSet:(DocSet *)docSet;
 - (BOOL)deleteBookmarkAtIndex:(NSInteger)bookmarkIndex fromDocSet:(DocSet *)docSet;
 - (BOOL)moveBookmarkAtIndex:(NSInteger)fromIndex inDocSet:(DocSet *)docSet toIndex:(NSInteger)toIndex;
+
+- (NSData *)bookmarksDataForSharingSyncLog;
 
 @end
