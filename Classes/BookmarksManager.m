@@ -10,8 +10,6 @@
 #import "DocSet.h"
 #import "NSString+RelativePath.h"
 
-//TODO: Don't allow duplicate bookmarks (move to the top when added instead)
-
 @interface BookmarksManager ()
 
 @property (nonatomic, strong) NSMetadataQuery *query;
@@ -386,18 +384,27 @@
 	
 	NSString *relativePath = [self relativeBookmarkPathWithBookmarkURL:bookmarkURL inDocSetWithPath:docSet.path];
 	
-	//TODO: Move bookmark to the top if one with the same path already exists...
-	
 	NSMutableArray *bookmarksForDocSet = [self.bookmarks objectForKey:docSet.bundleID];
 	if (!bookmarksForDocSet) {
 		bookmarksForDocSet = [NSMutableArray array];
 		[self.bookmarks setObject:bookmarksForDocSet forKey:docSet.bundleID];
 	}
-	
-	NSDictionary *bookmark = [NSDictionary dictionaryWithObjectsAndKeys:relativePath, @"path", bookmarkTitle, @"title", subtitle, @"subtitle", nil];
-	[bookmarksForDocSet insertObject:bookmark atIndex:0];
-	[self saveBookmarks];
-	
+	NSInteger existingBookmarkIndex = NSNotFound;
+	NSInteger i = 0;
+	for (NSDictionary *existingBookmark in bookmarksForDocSet) {
+		if ([[existingBookmark objectForKey:@"path"] isEqualToString:relativePath]) {
+			existingBookmarkIndex = i;
+			break;
+		}
+		i++;
+	}
+	if (existingBookmarkIndex != NSNotFound) {
+		[self moveBookmarkAtIndex:existingBookmarkIndex inDocSet:docSet toIndex:0];
+	} else {
+		NSDictionary *bookmark = [NSDictionary dictionaryWithObjectsAndKeys:relativePath, @"path", bookmarkTitle, @"title", subtitle, @"subtitle", nil];
+		[bookmarksForDocSet insertObject:bookmark atIndex:0];
+		[self saveBookmarks];
+	}
 	return YES;
 }
 
