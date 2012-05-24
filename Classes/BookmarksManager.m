@@ -10,6 +10,9 @@
 #import "DocSet.h"
 #import "NSString+RelativePath.h"
 
+//TODO: Migrate legacy bookmarks when iCloud is not enabled!
+//TODO: Migrate local bookmarks to iCloud when iCloud becomes available (potentially also vice-versa but that's not as important)!
+
 @interface BookmarksManager ()
 
 @property (nonatomic, strong) NSMetadataQuery *query;
