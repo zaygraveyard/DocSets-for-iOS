@@ -11,7 +11,7 @@
 
 @implementation DocSet
 
-@synthesize path, title, copyright, bundleID, bookmarks;
+@synthesize path, title, copyright, bundleID;
 
 - (id)initWithPath:(NSString *)docSetPath
 {
@@ -34,29 +34,9 @@
 	
 	searchQueue = dispatch_queue_create("DocSet Search Queue", NULL);
 	
-	//NSLog(@"Legacy bookmarks: %@", self.bookmarks);
-	
 	return self;
 }
 
-- (NSMutableArray *)bookmarks
-{
-	//load bookmarks lazily:
-	if (!bookmarks) {
-		NSString *bookmarksPath = [path stringByAppendingPathComponent:@"Bookmarks.plist"];
-		bookmarks = [NSMutableArray arrayWithContentsOfFile:bookmarksPath];
-		if (!bookmarks) {
-			bookmarks = [NSMutableArray array];
-		}
-	}
-	return bookmarks;
-}
-
-- (void)saveBookmarks
-{
-	NSString *bookmarksPath = [path stringByAppendingPathComponent:@"Bookmarks.plist"];
-	[[self bookmarks] writeToFile:bookmarksPath atomically:YES];
-}
 
 - (void)prepareSearch
 {

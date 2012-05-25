@@ -30,8 +30,6 @@ typedef void(^DocSetSearchCompletionHandler)(NSString *searchTerm, NSArray *resu
 	BOOL loadingTokens;
 	NSArray *tokens;
 	NSArray *nodeInfos;
-	
-	NSMutableArray *bookmarks;
 }
 
 @property (nonatomic, strong, readonly) NSString *path;
@@ -40,12 +38,10 @@ typedef void(^DocSetSearchCompletionHandler)(NSString *searchTerm, NSArray *resu
 @property (nonatomic, strong, readonly) NSString *bundleID;
 @property (nonatomic, strong, readonly) NSManagedObjectContext *managedObjectContext;
 @property (nonatomic, strong, readonly) NSPersistentStoreCoordinator *persistentStoreCoordinator;
-@property (nonatomic, strong, readonly) NSMutableArray *bookmarks;
 
 - (id)initWithPath:(NSString *)docSetPath;
 - (NSArray *)nodeSectionsForRootNode:(NSManagedObject *)rootNode;
 - (BOOL)nodeIsExpandable:(NSManagedObject *)node;
-- (void)saveBookmarks;
 - (void)prepareSearch;
 - (void)searchForNodesMatching:(NSString *)searchTerm completion:(DocSetSearchCompletionHandler)completion;
 - (void)searchForTokensMatching:(NSString *)searchTerm completion:(DocSetSearchCompletionHandler)completion;
