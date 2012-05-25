@@ -10,9 +10,6 @@
 #import "DocSet.h"
 #import "NSString+RelativePath.h"
 
-//TODO: Migrate legacy bookmarks when iCloud is not enabled!
-//TODO: Migrate local bookmarks to iCloud when iCloud becomes available (potentially also vice-versa but that's not as important)!
-
 @interface BookmarksManager ()
 
 @property (nonatomic, strong) NSMetadataQuery *query;
@@ -27,6 +24,8 @@
 - (NSURL *)localBookmarksURL;
 - (NSMutableDictionary *)legacyBookmarks;
 - (void)removeLegacyBookmarks;
+- (BOOL)migrateLocalBookmarksAndSave:(BOOL)save;
+- (BOOL)removeLocalBookmarks;
 
 @end
 
@@ -65,6 +64,7 @@
 - (void)log:(NSString *)message withLevel:(int)level
 {
 	dispatch_async(dispatch_get_main_queue(), ^{
+		//NSLog(@"%@", message);
 		NSDictionary *logEntry = [NSDictionary dictionaryWithObjectsAndKeys:
 								  message, kBookmarkSyncLogTitle, 
 								  [NSNumber numberWithInt:level], kBookmarkSyncLogLevel, 
@@ -126,11 +126,13 @@
 {
 	[self.query disableUpdates];
 	
+	NSFileManager *fm = [[NSFileManager alloc] init];
+	NSURL *localDocumentsURL = [[fm URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0];
+	
 	NSArray *queryResults = [self.query results];
 	if (queryResults.count == 0) {
 		if (!self.movingToUbiquityContainer) {
 			self.movingToUbiquityContainer = YES;
-			NSFileManager *fm = [[NSFileManager alloc] init];
 			
 			NSMutableDictionary *legacyBookmarks = [self legacyBookmarks];
 			if (legacyBookmarks.count > 0) {
@@ -144,10 +146,14 @@
 			
 			[self log:@"Moving bookmarks to iCloud..." withLevel:1];
 			
-			NSData *bookmarksData = [self dataFromBookmarks:self.bookmarks error:NULL];
-			
-			NSURL *localDocumentsURL = [[fm URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] objectAtIndex:0];
 			NSURL *tempBookmarksURL = [localDocumentsURL URLByAppendingPathComponent:@"TempBookmarks.plist"];
+			
+			BOOL localBookmarksMigrated = [self migrateLocalBookmarksAndSave:NO];
+			if (localBookmarksMigrated) {
+				[self log:@"Migrating local bookmarks." withLevel:0];
+			}
+			
+			NSData *bookmarksData = [self dataFromBookmarks:self.bookmarks error:NULL];
 			[bookmarksData writeToURL:tempBookmarksURL atomically:YES];
 			
 			dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -160,6 +166,7 @@
 					[fm removeItemAtURL:tempBookmarksURL error:NULL];
 				} else {
 					[self log:@"Bookmarks successfully moved to iCloud." withLevel:0];
+					[self removeLocalBookmarks];
 				}
 				self.movingToUbiquityContainer = NO;
 			});
@@ -189,6 +196,10 @@
 								self.lastSavedDeviceName = [currentVersion localizedNameOfSavingComputer];
 								[self postChangeNotification];
 								[self log:[NSString stringWithFormat:@"Bookmarks loaded (from %@).", self.lastSavedDeviceName] withLevel:0];
+								dispatch_async(dispatch_get_main_queue(), ^{
+									[self migrateLocalBookmarksAndSave:YES];
+									[self removeLocalBookmarks];
+								});
 							}
 						}
 					}];
@@ -462,6 +473,39 @@
 	}
 	[self saveBookmarks];
 	return YES;
+}
+
+#pragma mark -
+
+- (BOOL)migrateLocalBookmarksAndSave:(BOOL)save
+{
+	NSURL *localBookmarksURL = [self localBookmarksURL];
+	NSData *localBookmarksData = [NSData dataWithContentsOfURL:localBookmarksURL];
+	if (localBookmarksData) {
+		NSMutableDictionary *localBookmarks = [self bookmarksFromData:localBookmarksData];
+		if (localBookmarks.count > 0) {
+			[self log:@"Migrating local bookmarks." withLevel:0];
+			self.bookmarks = [self mergedBookmarksFromVersions:[NSArray arrayWithObjects:localBookmarks, self.bookmarks, nil]];
+			[self postChangeNotification];
+			if (save) {
+				[self saveBookmarks];
+			}
+			return YES;
+		}
+	}
+	return NO;
+}
+
+- (BOOL)removeLocalBookmarks
+{
+	NSFileManager *fm = [NSFileManager new];
+	NSURL *localBookmarksURL = [self localBookmarksURL];
+	BOOL localBookmarksRemoved = [fm removeItemAtURL:localBookmarksURL error:NULL];
+	if (localBookmarksRemoved) {
+		[self log:@"Removed local bookmarks." withLevel:0];
+		return YES;
+	}
+	return NO;
 }
 
 #pragma mark - Legacy Bookmark Migration
