@@ -78,7 +78,7 @@
 	if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
 		return YES;
 	}
-	return interfaceOrientation == UIInterfaceOrientationPortrait;
+	return UIInterfaceOrientationIsLandscape(interfaceOrientation) || (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 
 #pragma mark -
