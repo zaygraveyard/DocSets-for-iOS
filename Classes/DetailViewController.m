@@ -84,7 +84,7 @@
 	CGFloat topToolbarHeight = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) ? 44.0 : 0.0;
 	webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, topToolbarHeight, self.view.bounds.size.width, self.view.bounds.size.height - topToolbarHeight)];
 	webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-	webView.scalesPageToFit = ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad);
+	webView.scalesPageToFit = YES;//([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad);
 	
 	webView.delegate = self;
 	[self.view addSubview:webView];
@@ -416,7 +416,7 @@
 		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
 			customCSS = @"<style>body { font-size: 16px !important; } pre { white-space: pre-wrap !important; }</style>";
 		} else {
-			customCSS = @"<style>body { font-size: 15px !important; max-width: 320px; padding: 15px !important; } pre { white-space: pre-wrap !important; } h1 { font-size: 160% !important; } h2 { font-size: 150% !important; } .specbox { margin: 0px !important; } #feedbackForm { display: none; } </style>";
+			customCSS = @"<meta name = \"viewport\" content = \"width = device-width, initial-scale=1.0\"><style>body { font-size: 15px !important; padding: 15px !important; } pre { white-space: pre-wrap !important; } #pageTitle {font-size: 22px !important;} h2.jump { font-size: 20px !important; } h3 { font-size: 20px !important; } #feedbackForm { display: none; }</style>";
 		}
 		NSString *html = [NSString stringWithContentsOfURL:URL encoding:NSUTF8StringEncoding error:NULL];
 		if ([[URL path] rangeOfString:@"__cached__"].location == NSNotFound) {
