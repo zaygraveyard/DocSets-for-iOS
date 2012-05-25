@@ -193,7 +193,7 @@
 						}
 					}];
 					if (coordinatorError) {
-						[self log:[NSString stringWithFormat:@"Could not load bookmarks from iCloud (%@ - %@).", [coordinatorError localizedDescription], [coordinatorError localizedFailureReason]] withLevel:2];
+						[self log:[NSString stringWithFormat:@"Could not load bookmarks from iCloud (%@).", [coordinatorError localizedDescription]] withLevel:2];
 						self.bookmarksModificationDate = nil;
 					}
 				});
@@ -328,7 +328,7 @@
 				}
 			}];
 			if (coordinatorError) {
-				[self log:[NSString stringWithFormat:@"Could not save bookmarks to iCloud (%@ - %@).", [coordinatorError localizedDescription], [coordinatorError localizedFailureReason]] withLevel:2];
+				[self log:[NSString stringWithFormat:@"Could not save bookmarks to iCloud (%@).", [coordinatorError localizedDescription]] withLevel:2];
 			} else {
 				[self log:@"Bookmarks saved." withLevel:0];
 			}
