@@ -88,18 +88,8 @@
 			[self log:@"iCloud became available." withLevel:0];
 		} else {
 			[self log:@"iCloud became unavailable." withLevel:2];
-		}
-		
-		if (!self.iCloudEnabled) {
-			[self log:@"Loading local bookmarks." withLevel:0];
-			NSURL *localBookmarksURL = [self localBookmarksURL];
-			NSData *bookmarksData = [NSData dataWithContentsOfURL:localBookmarksURL];
-			if (bookmarksData) {
-				self.bookmarks = [self bookmarksFromData:bookmarksData];
-			} else {
-				self.bookmarks = [NSMutableDictionary dictionary];
-			}
-		} else {
+		}	
+		if (self.iCloudEnabled) {
 			self.bookmarksModificationDate = nil;
 			self.bookmarks = nil;
 		}
@@ -110,6 +100,14 @@
 		[self startICloudQuery];
 	} else {
 		self.query = nil;
+		[self log:@"Loading local bookmarks." withLevel:0];
+		NSURL *localBookmarksURL = [self localBookmarksURL];
+		NSData *bookmarksData = [NSData dataWithContentsOfURL:localBookmarksURL];
+		if (bookmarksData) {
+			self.bookmarks = [self bookmarksFromData:bookmarksData];
+		} else {
+			self.bookmarks = [NSMutableDictionary dictionary];
+		}
 	}
 }
 
