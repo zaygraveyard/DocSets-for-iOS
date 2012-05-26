@@ -354,13 +354,11 @@
 		childViewController.detailViewController = self.detailViewController;
 		[self.navigationController pushViewController:childViewController animated:YES];
 	} else {
-		
 		if ([[node valueForKey:@"installDomain"] intValue] > 1) {
 			NSURL *webURL = [docSet webURLForNode:node];
 			[[UIApplication sharedApplication] openURL:webURL];
 			return;
 		}
-		
 		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
 			[self.detailViewController showNode:node inDocSet:docSet];
 		} else {
@@ -376,6 +374,7 @@
 	BookmarksViewController *vc = [[BookmarksViewController alloc] initWithDocSet:self.docSet];
 	vc.delegate = self;
 	UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:vc];
+	navController.toolbarHidden = NO;
 	[self presentModalViewController:navController animated:YES];
 }
 
