@@ -321,6 +321,7 @@
 		NSManagedObject *node = [[nodeSection objectForKey:kNodeSectionNodes] objectAtIndex:indexPath.row];
 		if ([[node valueForKey:@"installDomain"] intValue] > 1) {
 			[aTableView deselectRowAtIndexPath:indexPath animated:YES];
+			[self openNode:node];
 		} else {
 			[self openNode:node];
 		}
@@ -356,7 +357,9 @@
 	} else {
 		if ([[node valueForKey:@"installDomain"] intValue] > 1) {
 			NSURL *webURL = [docSet webURLForNode:node];
-			[[UIApplication sharedApplication] openURL:webURL];
+			if (webURL) {
+				[[UIApplication sharedApplication] openURL:webURL];
+			}
 			return;
 		}
 		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {

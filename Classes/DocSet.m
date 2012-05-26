@@ -267,7 +267,16 @@
 
 - (NSURL *)webURLForNode:(NSManagedObject *)node
 {
-	return [fallbackURL URLByAppendingPathComponent:[node valueForKey:@"kPath"]];
+	NSString *nodePath = [node valueForKey:@"kPath"];
+	if (nodePath) {
+		return [fallbackURL URLByAppendingPathComponent:nodePath];
+	} else {
+		NSString *webURL = [node valueForKey:@"kURL"];
+		if (webURL) {
+			return [NSURL URLWithString:webURL];
+		}
+	}
+	return nil;
 }
 
 
