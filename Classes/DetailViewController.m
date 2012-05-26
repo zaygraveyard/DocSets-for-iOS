@@ -408,7 +408,6 @@
 
 - (BOOL)webView:(UIWebView *)aWebView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
 {
-	//TODO: It would probably be better to encapsulate this logic in the DocSet class...
 	NSURL *URL = [request URL];
 	[self updateBackForwardButtons];
 	if ([[URL scheme] isEqualToString:@"file"]) {
@@ -416,7 +415,7 @@
 		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
 			customCSS = @"<style>body { font-size: 16px !important; } pre { white-space: pre-wrap !important; }</style>";
 		} else {
-			customCSS = @"<meta name = \"viewport\" content = \"width = device-width, initial-scale=1.0\"><style>body { font-size: 15px !important; padding: 15px !important; } pre { white-space: pre-wrap !important; } #pageTitle {font-size: 22px !important;} h2.jump { font-size: 20px !important; } h3 { font-size: 20px !important; } #feedbackForm { display: none; }</style>";
+			customCSS = @"<meta name = \"viewport\" content = \"width = device-width, initial-scale=1.0\"><style>body { font-size: 15px !important; padding: 15px !important; } pre { white-space: pre-wrap !important; } h1 {font-size: 22px !important;} h2 { font-size: 20px !important; } h3 { font-size: 18px !important; } .dtsDocNumber {font-size: 22px !important;} .specbox { margin-left: 0 !important; } #feedbackForm { display: none; }</style>";
 		}
 		NSString *html = [NSString stringWithContentsOfURL:URL encoding:NSUTF8StringEncoding error:NULL];
 		if ([[URL path] rangeOfString:@"__cached__"].location == NSNotFound) {
