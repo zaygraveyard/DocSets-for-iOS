@@ -40,7 +40,7 @@
 			<key>title</key>
 			<string>OS X 10.8 Core Library</string>
 			<key>name</key>
-			<string>com.apple.adc.documentation.AppleOSX10_8.CoreReference</string>
+			<string>com.apple.adc.documentation.AppleOSX10_8.CoreReference.docset</string>
 			<key>URL</key>
 			<string>https://devimages.apple.com.edgekey.net/docsets/20120725/com.apple.adc.documentation.AppleOSX10_8.CoreReference.xar</string>
 		</dict>
