@@ -38,6 +38,14 @@
 		</dict>
 		<dict>
 			<key>title</key>
+			<string>Mac OS X 10.8 Core Library</string>
+			<key>name</key>
+			<string>com.apple.adc.documentation.AppleOSX10_8.CoreReference</string>
+			<key>URL</key>
+			<string>https://devimages.apple.com.edgekey.net/docsets/20120725/com.apple.adc.documentation.AppleOSX10_8.CoreReference.xar</string>
+		</dict>
+		<dict>
+			<key>title</key>
 			<string>Mac OS X 10.7 Core Library</string>
 			<key>name</key>
 			<string>com.apple.adc.documentation.AppleLion.CoreReference.docset</string>
