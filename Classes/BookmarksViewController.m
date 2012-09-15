@@ -16,7 +16,9 @@
 
 @implementation BookmarksViewController
 
-@synthesize syncInfoButtonItem=_syncInfoButtonItem;
+@synthesize syncInfoButtonItem = _syncInfoButtonItem;
+@synthesize syncInfoTitleItem = _syncInfoTitleItem;
+@synthesize syncTitleLabel = _syncTitleLabel;
 @synthesize delegate=_delegate;
 
 - (id)initWithDocSet:(DocSet *)selectedDocSet
@@ -24,16 +26,31 @@
 	self = [super initWithStyle:UITableViewStylePlain];
 	if (self) {
 		self.title = NSLocalizedString(@"Bookmarks", nil);
-		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+		if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
 			self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done:)];
-		} else {
+		else
 			self.contentSizeForViewInPopover = CGSizeMake(320, 480);
-		}
 		
+        self.navigationItem.leftBarButtonItem = self.editButtonItem;
+        
+        self.syncTitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 220.0, 25.0)];
+        self.syncTitleLabel.textColor = [UIColor whiteColor];
+        self.syncTitleLabel.font = [UIFont systemFontOfSize:12.0];
+        self.syncTitleLabel.backgroundColor = [UIColor clearColor];
+        
+        UIButton *syncInfoButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        syncInfoButton.backgroundColor = [UIColor clearColor];
+        syncInfoButton.showsTouchWhenHighlighted = YES;
+        syncInfoButton.frame = self.syncTitleLabel.frame;
+        [syncInfoButton addSubview:self.syncTitleLabel];
+        [syncInfoButton addTarget:self action:@selector(showBookmarkSyncLogViewController) forControlEvents:UIControlEventTouchUpInside];
+        self.syncInfoTitleItem = [[UIBarButtonItem alloc] initWithCustomView:syncInfoButton];
+        
+        UIBarButtonItem *flexSpace1 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        UIBarButtonItem *flexSpace2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
 		UIBarButtonItem *shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareBookmarks:)];
-		UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-		self.toolbarItems = [NSArray arrayWithObjects:[self editButtonItem], flexSpace, shareItem, nil];
-		
+		self.toolbarItems = [NSArray arrayWithObjects:flexSpace1, flexSpace2, shareItem, nil];
+        
 		docSet = selectedDocSet;
 		
 		UIButton *cloudButton = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -46,6 +63,9 @@
 		[[BookmarksManager sharedBookmarksManager] addObserver:self forKeyPath:@"iCloudEnabled" options:NSKeyValueObservingOptionNew context:nil];
 		[self showOrHideSyncLogButton];
 		
+        if ([[BookmarksManager sharedBookmarksManager] iCloudEnabled])
+            [self showSyncLog:nil];
+        
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bookmarksDidUpdate:) name:BookmarksManagerDidLoadBookmarksNotification object:nil];
 	}
 	return self;
@@ -60,9 +80,17 @@
 {
 	BOOL iCloudEnabled = [[BookmarksManager sharedBookmarksManager] iCloudEnabled];
 	if (iCloudEnabled) {
-		self.navigationItem.leftBarButtonItem = self.syncInfoButtonItem;
+		NSMutableArray *items = self.toolbarItems.mutableCopy;
+        if (![items containsObject:self.syncInfoButtonItem])
+            [items insertObject:self.syncInfoButtonItem atIndex:0];
+        if (![items containsObject:self.syncInfoTitleItem])
+            [items insertObject:self.syncInfoTitleItem atIndex:2];
+        self.toolbarItems = items;
 	} else {
-		self.navigationItem.leftBarButtonItem = nil;
+		NSMutableArray *items = self.toolbarItems.mutableCopy;
+        [items removeObject:self.syncInfoButtonItem];
+        [items removeObject:self.syncInfoTitleItem];
+        self.toolbarItems = items;
 	}
 }
 
@@ -72,20 +100,23 @@
 	if (!deviceName) deviceName = NSLocalizedString(@"Unknown Device", nil);
 	NSDate *modifiedDate = [[BookmarksManager sharedBookmarksManager] bookmarksModificationDate];
 	NSString *modifiedDateString = [NSDateFormatter localizedStringFromDate:modifiedDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
-	NSString *shortSyncStatus = [NSString stringWithFormat:NSLocalizedString(@"Your bookmarks are synced with iCloud.\n\nLast modified by %@ (%@)", nil), deviceName, modifiedDateString];
-	UIAlertView *statusAlert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"iCloud Sync Status", nil) message:shortSyncStatus delegate:self cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:NSLocalizedString(@"Show Log...", nil), nil];
-	statusAlert.tag = SYNC_STATUS_ALERT_TAG;
-	[statusAlert show];
+    NSString *shortSyncStatus = [NSString stringWithFormat:NSLocalizedString(@"Last modified %@", nil), modifiedDateString];
+    self.syncTitleLabel.text = shortSyncStatus;
+}
+
+- (void)showBookmarkSyncLogViewController
+{
+    BookmarkSyncLogViewController *vc = [[BookmarkSyncLogViewController alloc] initWithStyle:UITableViewStylePlain];
+    vc.title = NSLocalizedString(@"iCloud Sync Log", nil);
+    vc.contentSizeForViewInPopover = self.contentSizeForViewInPopover;
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
 	if (alertView.tag == SYNC_STATUS_ALERT_TAG) {
 		if (buttonIndex != alertView.cancelButtonIndex) {
-			BookmarkSyncLogViewController *vc = [[BookmarkSyncLogViewController alloc] initWithStyle:UITableViewStylePlain];
-			vc.title = NSLocalizedString(@"iCloud Sync Log", nil);
-			vc.contentSizeForViewInPopover = self.contentSizeForViewInPopover;
-			[self.navigationController pushViewController:vc animated:YES];
+			[self showBookmarkSyncLogViewController];
 		}
 	}
 }
