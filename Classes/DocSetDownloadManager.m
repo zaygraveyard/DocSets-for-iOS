@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 omz:software. All rights reserved.
 //
 
+#import "NSFileManager+DocSetsAdditions.h"
 #import "DocSetDownloadManager.h"
 #import "DocSet.h"
 #import "xar.h"
@@ -68,7 +69,7 @@
 				[updatedDocSetsData writeToFile:cachedAvailableDownloadsPath atomically:YES];
 			} else {
 				//Downloaded file is somehow not a valid plist...
-			}	
+			}
 		}
 		dispatch_async(dispatch_get_main_queue(), ^{
 			_updatingAvailableDocSetsFromWeb = NO;
@@ -149,8 +150,32 @@
 - (void)deleteDocSet:(DocSet *)docSetToDelete
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:DocSetWillBeDeletedNotification object:docSetToDelete userInfo:nil];
-	[[NSFileManager defaultManager] removeItemAtPath:docSetToDelete.path error:NULL];
-	[self reloadDownloadedDocSets];
+	
+    NSString *tempPath = [[NSFileManager defaultManager] uniquePathInTempDirectory];
+    if ([[NSFileManager defaultManager] moveItemAtPath:docSetToDelete.path toPath:tempPath error:NULL]) {
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+            __block UIBackgroundTaskIdentifier backgroundTaskID = UIBackgroundTaskInvalid;
+            
+            // Completion block to excute when task has completed or timed out.
+            void (^completionBlock)() = ^{
+                [[UIApplication sharedApplication] endBackgroundTask:backgroundTaskID];
+                backgroundTaskID = UIBackgroundTaskInvalid;
+            };
+            
+            // Register background task.
+            backgroundTaskID = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:completionBlock];
+            
+            NSFileManager *fileManager = [[NSFileManager alloc] init];
+            [fileManager removeItemAtPath:tempPath error:NULL];
+            
+            // Trigger completion block when task completes.
+            if (backgroundTaskID != UIBackgroundTaskInvalid)
+                completionBlock();
+        });
+    }
+    [self reloadDownloadedDocSets];
 }
 
 - (DocSet *)downloadedDocSetWithName:(NSString *)docSetName
@@ -195,7 +220,7 @@
 	
 	[self reloadDownloadedDocSets];
 	
-	[_downloadsByURL removeObjectForKey:[download.URL absoluteString]];	
+	[_downloadsByURL removeObjectForKey:[download.URL absoluteString]];
 	self.currentDownload = nil;
 	[self startNextDownload];
 }
@@ -203,15 +228,15 @@
 - (void)downloadFailed:(DocSetDownload *)download
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:DocSetDownloadFinishedNotification object:download];
-	[_downloadsByURL removeObjectForKey:[download.URL absoluteString]];	
+	[_downloadsByURL removeObjectForKey:[download.URL absoluteString]];
 	self.currentDownload = nil;
 	[self startNextDownload];
 	
-	[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Download Failed", nil) 
-								 message:NSLocalizedString(@"An error occured while trying to download the DocSet.", nil) 
-								delegate:nil 
-					   cancelButtonTitle:NSLocalizedString(@"OK", nil) 
-					   otherButtonTitles:nil] show];
+	[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Download Failed", nil)
+                                message:NSLocalizedString(@"An error occured while trying to download the DocSet.", nil)
+                               delegate:nil
+                      cancelButtonTitle:NSLocalizedString(@"OK", nil)
+                      otherButtonTitles:nil] show];
 }
 
 @end
@@ -320,7 +345,7 @@
 					NSLog(@"Extracting cancelled");
 					break;
 				}
-				if (f) {				
+				if (f) {
 					const char *name = NULL;
 					xar_prop_get(f, "name", &name);
 					int32_t extractResult = xar_extract(x, f);
