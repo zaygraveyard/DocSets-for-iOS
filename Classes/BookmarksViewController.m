@@ -100,7 +100,7 @@
 	if (!deviceName) deviceName = NSLocalizedString(@"Unknown Device", nil);
 	NSDate *modifiedDate = [[BookmarksManager sharedBookmarksManager] bookmarksModificationDate];
 	NSString *modifiedDateString = [NSDateFormatter localizedStringFromDate:modifiedDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
-    NSString *shortSyncStatus = [NSString stringWithFormat:NSLocalizedString(@"Last modified %@", nil), modifiedDateString];
+    NSString *shortSyncStatus = [NSString stringWithFormat:NSLocalizedString(@"Last modified: %@", nil), modifiedDateString];
     self.syncTitleLabel.text = shortSyncStatus;
 }
 
