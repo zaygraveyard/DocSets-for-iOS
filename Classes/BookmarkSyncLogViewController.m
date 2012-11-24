@@ -67,6 +67,7 @@
 	if (!cell) {
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
 		cell.textLabel.font = [UIFont boldSystemFontOfSize:14.0];
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
 	}
 	NSMutableArray *log = [[BookmarksManager sharedBookmarksManager] syncLog];
 	NSDictionary *logEntry = [log objectAtIndex:log.count - indexPath.row - 1];
@@ -84,21 +85,6 @@
 	}
 	
     return cell;
-}
-
-#pragma mark - Table view delegate
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-	[tableView deselectRowAtIndexPath:indexPath animated:YES];
-	NSMutableArray *log = [[BookmarksManager sharedBookmarksManager] syncLog];
-	NSDictionary *logEntry = [log objectAtIndex:log.count - indexPath.row - 1];
-	NSString *message = [logEntry objectForKey:kBookmarkSyncLogTitle];
-	[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Log Message", nil) 
-								message:message 
-							   delegate:nil 
-					  cancelButtonTitle:NSLocalizedString(@"OK", nil) 
-					  otherButtonTitles:nil] show];
 }
 
 #pragma mark -
