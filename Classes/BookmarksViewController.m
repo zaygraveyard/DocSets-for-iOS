@@ -35,7 +35,7 @@
         
         self.syncTitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 220.0, 29.0)];
         self.syncTitleLabel.textColor = [UIColor whiteColor];
-        self.syncTitleLabel.font = [UIFont systemFontOfSize:10.0];
+        self.syncTitleLabel.font = [UIFont systemFontOfSize:12.0];
         self.syncTitleLabel.backgroundColor = [UIColor clearColor];
         self.syncInfoTitleItem = [[UIBarButtonItem alloc] initWithCustomView:self.syncTitleLabel];
         
