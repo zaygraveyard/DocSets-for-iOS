@@ -33,18 +33,11 @@
 		
         self.navigationItem.leftBarButtonItem = self.editButtonItem;
         
-        self.syncTitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 220.0, 25.0)];
+        self.syncTitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 220.0, 29.0)];
         self.syncTitleLabel.textColor = [UIColor whiteColor];
-        self.syncTitleLabel.font = [UIFont systemFontOfSize:12.0];
+        self.syncTitleLabel.font = [UIFont systemFontOfSize:10.0];
         self.syncTitleLabel.backgroundColor = [UIColor clearColor];
-        
-        UIButton *syncInfoButton = [UIButton buttonWithType:UIButtonTypeCustom];
-        syncInfoButton.backgroundColor = [UIColor clearColor];
-        syncInfoButton.showsTouchWhenHighlighted = YES;
-        syncInfoButton.frame = self.syncTitleLabel.frame;
-        [syncInfoButton addSubview:self.syncTitleLabel];
-        [syncInfoButton addTarget:self action:@selector(showBookmarkSyncLogViewController) forControlEvents:UIControlEventTouchUpInside];
-        self.syncInfoTitleItem = [[UIBarButtonItem alloc] initWithCustomView:syncInfoButton];
+        self.syncInfoTitleItem = [[UIBarButtonItem alloc] initWithCustomView:self.syncTitleLabel];
         
         UIBarButtonItem *flexSpace1 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
         UIBarButtonItem *flexSpace2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
@@ -57,14 +50,14 @@
 		[cloudButton setImage:[UIImage imageNamed:@"CloudLog.png"] forState:UIControlStateNormal];
 		cloudButton.showsTouchWhenHighlighted = YES;
 		cloudButton.frame = CGRectMake(0, 0, 29, 29);
-		[cloudButton addTarget:self action:@selector(showSyncLog:) forControlEvents:UIControlEventTouchUpInside];
+		[cloudButton addTarget:self action:@selector(showBookmarkSyncLogViewController) forControlEvents:UIControlEventTouchUpInside];
 		self.syncInfoButtonItem = [[UIBarButtonItem alloc] initWithCustomView:cloudButton];
 		
 		[[BookmarksManager sharedBookmarksManager] addObserver:self forKeyPath:@"iCloudEnabled" options:NSKeyValueObservingOptionNew context:nil];
 		[self showOrHideSyncLogButton];
 		
         if ([[BookmarksManager sharedBookmarksManager] iCloudEnabled])
-            [self showSyncLog:nil];
+            [self updateSyncState];
         
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bookmarksDidUpdate:) name:BookmarksManagerDidLoadBookmarksNotification object:nil];
 	}
@@ -94,7 +87,7 @@
 	}
 }
 
-- (void)showSyncLog:(id)sender
+- (void)updateSyncState
 {
 	NSString *deviceName = [[BookmarksManager sharedBookmarksManager] lastSavedDeviceName];
 	if (!deviceName) deviceName = NSLocalizedString(@"Unknown Device", nil);
@@ -157,6 +150,7 @@
 - (void)bookmarksDidUpdate:(NSNotification *)notification
 {
 	[self.tableView reloadData];
+    [self updateSyncState];
 }
 
 - (void)viewDidLoad
