@@ -89,12 +89,13 @@
 
 - (void)updateSyncState
 {
-	NSString *deviceName = [[BookmarksManager sharedBookmarksManager] lastSavedDeviceName];
-	if (!deviceName) deviceName = NSLocalizedString(@"Unknown Device", nil);
 	NSDate *modifiedDate = [[BookmarksManager sharedBookmarksManager] bookmarksModificationDate];
-	NSString *modifiedDateString = [NSDateFormatter localizedStringFromDate:modifiedDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
-    NSString *shortSyncStatus = [NSString stringWithFormat:NSLocalizedString(@"Last modified: %@", nil), modifiedDateString];
-    self.syncTitleLabel.text = shortSyncStatus;
+    
+    if (modifiedDate) {
+        NSString *modifiedDateString = [NSDateFormatter localizedStringFromDate:modifiedDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+        NSString *shortSyncStatus = [NSString stringWithFormat:NSLocalizedString(@"Last modified: %@", nil), modifiedDateString];
+        self.syncTitleLabel.text = shortSyncStatus;
+    }
 }
 
 - (void)showBookmarkSyncLogViewController
@@ -117,10 +118,10 @@
 - (void)shareBookmarks:(id)sender
 {
 	if (![MFMailComposeViewController canSendMail]) {
-		[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Send Mail", nil) 
-									message:NSLocalizedString(@"Your device is not configured for sending email. Please use the Settings app to set up an email account.", nil) 
-								   delegate:nil 
-						  cancelButtonTitle:NSLocalizedString(@"OK", nil) 
+		[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Send Mail", nil)
+									message:NSLocalizedString(@"Your device is not configured for sending email. Please use the Settings app to set up an email account.", nil)
+								   delegate:nil
+						  cancelButtonTitle:NSLocalizedString(@"OK", nil)
 						  otherButtonTitles:nil] show];
 		return;
 	}
@@ -218,10 +219,10 @@
 		if ([[BookmarksManager sharedBookmarksManager] deleteBookmarkAtIndex:indexPath.row fromDocSet:docSet]) {
 			[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
 		} else {
-			[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) 
-										message:NSLocalizedString(@"Bookmarks are currently being synced. Please try again in a moment.", nil) 
-									   delegate:nil 
-							  cancelButtonTitle:NSLocalizedString(@"OK", nil) 
+			[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil)
+										message:NSLocalizedString(@"Bookmarks are currently being synced. Please try again in a moment.", nil)
+									   delegate:nil
+							  cancelButtonTitle:NSLocalizedString(@"OK", nil)
 							  otherButtonTitles:nil] show];
 		}
 	}
