@@ -92,7 +92,7 @@
 	NSDate *modifiedDate = [[BookmarksManager sharedBookmarksManager] bookmarksModificationDate];
     
     if (modifiedDate) {
-        NSString *modifiedDateString = [NSDateFormatter localizedStringFromDate:modifiedDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+        NSString *modifiedDateString = [NSDateFormatter localizedStringFromDate:modifiedDate dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle];
         NSString *shortSyncStatus = [NSString stringWithFormat:NSLocalizedString(@"Last modified: %@", nil), modifiedDateString];
         self.syncTitleLabel.text = shortSyncStatus;
     }
