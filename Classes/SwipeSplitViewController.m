@@ -40,7 +40,7 @@
 	[super loadView];
 	
 	self.detailViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-	self.masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleHeight;
+	self.masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
 	
 	self.masterViewController.view.layer.cornerRadius = 6.0;
 	self.masterViewController.view.clipsToBounds = YES;
@@ -50,6 +50,7 @@
 	self.detailViewController.view.clipsToBounds = YES;
 	
 	self.masterContainerView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Shadow.png"]];
+	_masterContainerView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleHeight;
 	_masterContainerView.userInteractionEnabled = YES;
 	_masterContainerView.contentStretch = CGRectMake(0.2, 0.2, 0.6, 0.6);
 	_masterContainerView.image = nil;
