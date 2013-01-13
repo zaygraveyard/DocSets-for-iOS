@@ -87,7 +87,6 @@
 		7F7862FC150D4ECD003CFB2E /* AboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F7862FB150D4ECD003CFB2E /* AboutViewController.m */; };
 		7F8889B414CDEB69007604D7 /* SwipeSplitViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F8889B314CDEB69007604D7 /* SwipeSplitViewController.m */; };
 		7F8889B714CDEC13007604D7 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F8889B514CDEC07007604D7 /* QuartzCore.framework */; };
-		7F8E059914CECB6100619A74 /* Shadow.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F8E059814CECB6100619A74 /* Shadow.png */; };
 		7F97CFCF160CDDB800313B1D /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F97CFCE160CDDB800313B1D /* Default-568h@2x.png */; };
 		7FACA8EA14CC0A2100BADCC8 /* libxml2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 7FACA8E914CC0A2100BADCC8 /* libxml2.dylib */; };
 		7FACA8ED14CC371C00BADCC8 /* DocSetDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FACA8EC14CC371C00BADCC8 /* DocSetDownloadManager.m */; };
@@ -242,7 +241,6 @@
 		7F8889B214CDEB69007604D7 /* SwipeSplitViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwipeSplitViewController.h; sourceTree = "<group>"; };
 		7F8889B314CDEB69007604D7 /* SwipeSplitViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SwipeSplitViewController.m; sourceTree = "<group>"; };
 		7F8889B514CDEC07007604D7 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		7F8E059814CECB6100619A74 /* Shadow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Shadow.png; sourceTree = "<group>"; };
 		7F97CFCE160CDDB800313B1D /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		7FACA8E914CC0A2100BADCC8 /* libxml2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libxml2.dylib; path = usr/lib/libxml2.dylib; sourceTree = SDKROOT; };
 		7FACA8EB14CC371C00BADCC8 /* DocSetDownloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocSetDownloadManager.h; sourceTree = "<group>"; };
@@ -397,7 +395,6 @@
 			children = (
 				7F0BEE76156D75E4008D806F /* whitey.png */,
 				7F0BEE77156D75E4008D806F /* whitey@2x.png */,
-				7F8E059814CECB6100619A74 /* Shadow.png */,
 			);
 			name = Backgrounds;
 			sourceTree = "<group>";
@@ -678,7 +675,6 @@
 				7FF70A1412ACCC87001FF09F /* Outline.png in Resources */,
 				7FF70B5412AD15B7001FF09F /* Back.png in Resources */,
 				7FF70B5512AD15B7001FF09F /* Forward.png in Resources */,
-				7F8E059914CECB6100619A74 /* Shadow.png in Resources */,
 				7F1D426314D0708F00A85CB3 /* Icon72.png in Resources */,
 				7F1D426514D071D500A85CB3 /* Icon114.png in Resources */,
 				7F1D426714D0721700A85CB3 /* Icon57.png in Resources */,
