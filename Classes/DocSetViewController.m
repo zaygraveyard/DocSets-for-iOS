@@ -93,7 +93,11 @@
 - (void)viewWillDisappear:(BOOL)animated
 {
 	[super viewWillDisappear:animated];
-	[self.searchDisplayController.searchBar resignFirstResponder];
+    if (self.searchDisplayController.searchBar.text.length == 0) {
+        [self.searchDisplayController setActive:NO animated:animated];
+    } else {
+        [self.searchDisplayController.searchBar resignFirstResponder];
+    }
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation 
