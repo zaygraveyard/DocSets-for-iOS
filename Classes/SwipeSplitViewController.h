@@ -10,14 +10,14 @@
 
 @interface SwipeSplitViewController : UIViewController {
 
-	UIImageView *_masterContainerView;
+	UIView *_masterContainerView;
 	UIViewController *_masterViewController;
 	UIViewController *_detailViewController;
 	
 	UIView *_shieldView;
 }
 
-@property (nonatomic, strong) UIImageView *masterContainerView;
+@property (nonatomic, strong) UIView *masterContainerView;
 @property (nonatomic, strong, readonly) UIViewController *masterViewController;
 @property (nonatomic, strong, readonly) UIViewController *detailViewController;
 @property (nonatomic, strong) UIView *shieldView;

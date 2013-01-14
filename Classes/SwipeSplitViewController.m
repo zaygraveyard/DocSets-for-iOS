@@ -38,30 +38,30 @@
 - (void)loadView
 {
 	[super loadView];
-	
-	self.detailViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-	self.masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-	
-	self.masterViewController.view.layer.cornerRadius = 6.0;
+    
+	self.masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+	self.masterViewController.view.layer.cornerRadius = 6.0f;
 	self.masterViewController.view.clipsToBounds = YES;
-	self.masterContainerView.layer.shouldRasterize = YES;
 	
-	self.detailViewController.view.layer.cornerRadius = 6.0;
+	self.detailViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+	self.detailViewController.view.layer.cornerRadius = 6.0f;
 	self.detailViewController.view.clipsToBounds = YES;
 	
-	self.masterContainerView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"Shadow.png"]];
-	_masterContainerView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleHeight;
-	_masterContainerView.userInteractionEnabled = YES;
-	_masterContainerView.contentStretch = CGRectMake(0.2, 0.2, 0.6, 0.6);
-	_masterContainerView.image = nil;
+	self.masterContainerView = [[UIView alloc] initWithFrame:self.masterViewController.view.frame];
+	self.masterContainerView.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleHeight;
+    CALayer* layer = self.masterContainerView.layer;
+    layer.shadowColor = [UIColor blackColor].CGColor;
+    layer.shadowOffset = CGSizeMake(0.0f, 0.0f);
+    layer.shadowRadius = 2.0f;
+    layer.masksToBounds = NO;
+    layer.rasterizationScale = 2.0f;
+	layer.shouldRasterize = YES;
 	
 	[self layoutViewControllers];
 	
 	[self.view addSubview:self.detailViewController.view];
-	self.masterViewController.view.frame = CGRectInset(_masterContainerView.bounds, 3, 3);
-	//self.masterViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-	[_masterContainerView addSubview:self.masterViewController.view];
-	[self.view addSubview:_masterContainerView];
+	[self.masterContainerView addSubview:self.masterViewController.view];
+	[self.view addSubview:self.masterContainerView];
 	
 	UISwipeGestureRecognizer *rightSwipeRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(rightSwipe:)];
 	rightSwipeRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
@@ -102,8 +102,9 @@
 		masterFrame = CGRectMake(0, 0, MASTER_VIEW_WIDTH_LANDSCAPE, boundsSize.height);
 		detailFrame = CGRectMake(MASTER_VIEW_WIDTH_LANDSCAPE + 1, 0, boundsSize.width - MASTER_VIEW_WIDTH_LANDSCAPE - 1, boundsSize.height);
 	}
-	self.masterContainerView.frame = CGRectInset(masterFrame, -3, -3);
-	self.masterViewController.view.frame = CGRectInset(self.masterContainerView.bounds, 3, 3);
+	self.masterContainerView.frame = masterFrame;
+    CALayer* layer = self.masterContainerView.layer;
+    layer.shadowPath = [UIBezierPath bezierPathWithRoundedRect:layer.bounds cornerRadius:6.0f].CGPath;
 	
 	self.detailViewController.view.frame = detailFrame;
 }
@@ -111,7 +112,7 @@
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
 	if (UIInterfaceOrientationIsLandscape(self.interfaceOrientation)) {
-		self.masterContainerView.image = nil;
+        self.masterContainerView.layer.shadowOpacity = 0;
 	}
 	
 	if (UIInterfaceOrientationIsLandscape(fromInterfaceOrientation) && UIInterfaceOrientationIsPortrait(self.interfaceOrientation)) {
@@ -130,10 +131,10 @@
 	CGSize boundsSize = self.view.bounds.size;
 	CGRect masterFrame = CGRectMake(0, 0, MASTER_VIEW_WIDTH_PORTRAIT, boundsSize.height);
 	
-	self.masterContainerView.image = [UIImage imageNamed:@"Shadow.png"];
+    self.masterContainerView.layer.shadowOpacity = .5;
 	
 	void(^transition)(void) = ^(void) {
-		self.masterContainerView.frame = CGRectInset(masterFrame, -3, -3);
+		self.masterContainerView.frame = masterFrame;
 	};
 	
 	if (!self.shieldView) {
@@ -172,14 +173,14 @@
 	void(^transition)(void) = ^(void) {
 		[self.masterViewController viewWillDisappear:animated];
 		[self layoutViewControllers];
-		[self.shieldView removeFromSuperview]; 
+		[self.shieldView removeFromSuperview];
+        self.masterContainerView.layer.shadowOpacity = 0;
 	};
 	if (animated) {
 		[UIView animateWithDuration:0.25 delay:0.0 options:UIViewAnimationOptionBeginFromCurrentState 
 						 animations:transition 
 						 completion:^ (BOOL finished) {
 							 if (finished) {
-								 self.masterContainerView.image = nil;
 								 [self.masterViewController viewDidDisappear:YES];
 							 }
 						 }];
