@@ -66,11 +66,12 @@
 
 - (void)updateToolbarStatusAnimated:(BOOL)animated
 {
-    BOOL idleTimerDisabled = [[UIApplication sharedApplication] isIdleTimerDisabled];
-    [self.disableIdleTimerSwitch setOn:idleTimerDisabled animated:animated];
-    
     BOOL shouldHideToolbar = ([[DocSetDownloadManager sharedDownloadManager] currentDownload] == nil);
-    [self.navigationController setToolbarHidden:shouldHideToolbar animated:animated];
+	if (!shouldHideToolbar) {
+		BOOL idleTimerDisabled = [[UIApplication sharedApplication] isIdleTimerDisabled];
+		[self.disableIdleTimerSwitch setOn:idleTimerDisabled animated:NO];
+	}
+	[self.navigationController setToolbarHidden:shouldHideToolbar animated:animated];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
