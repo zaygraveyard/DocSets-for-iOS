@@ -11,6 +11,8 @@
 
 @implementation DownloadViewController
 
+@synthesize disableIdleTimerSwitch = _disableIdleTimerSwitch;
+
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
@@ -28,6 +30,24 @@
 	self.tableView.rowHeight = 64.0;
 	self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done:)];
 	self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(updateAvailableDocSetsFromWeb:)];
+    
+    [self setupToolbar];
+    [self.navigationController setToolbarHidden:YES];
+}
+
+- (void)setupToolbar
+{
+    UILabel *disableIdleTimerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 300.0, 30.0f)];
+    disableIdleTimerLabel.text = NSLocalizedString(@"Disable Idle Timer During Download", nil);
+    UISwitch *disableIdleTimerSwitch = [[UISwitch alloc] init];
+    [disableIdleTimerSwitch addTarget:self action:@selector(disableIdleTimerSwitchToggled:) forControlEvents:UIControlEventValueChanged];
+    
+    UIBarButtonItem *labelItem = [[UIBarButtonItem alloc] initWithCustomView:disableIdleTimerLabel];
+    UIBarButtonItem *flexibleSpaceItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+    UIBarButtonItem *switchItem = [[UIBarButtonItem alloc] initWithCustomView:disableIdleTimerSwitch];
+    self.toolbarItems = [NSArray arrayWithObjects:labelItem, flexibleSpaceItem, switchItem, nil];
+    
+    self.disableIdleTimerSwitch = disableIdleTimerSwitch;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -58,6 +78,10 @@
 - (void)done:(id)sender
 {
 	[self dismissModalViewControllerAnimated:YES];
+}
+
+- (void)disableIdleTimerSwitchToggled:(id)sender
+{
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
