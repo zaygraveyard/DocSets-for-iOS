@@ -20,6 +20,7 @@
 		self.title = NSLocalizedString(@"Download", nil);
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(docSetsChanged:) name:DocSetDownloadManagerUpdatedDocSetsNotification object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(availableDocSetsChanged:) name:DocSetDownloadManagerAvailableDocSetsChangedNotification object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(idleTimerToggled:) name:DocSetDownloadManagerIdleTimerToggledNotification object:nil];
     }
     return self;
 }
@@ -32,7 +33,11 @@
 	self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(updateAvailableDocSetsFromWeb:)];
     
     [self setupToolbar];
-    [self.navigationController setToolbarHidden:YES];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [self updateToolbarStatusAnimated:NO];
 }
 
 - (void)setupToolbar
@@ -48,6 +53,15 @@
     self.toolbarItems = [NSArray arrayWithObjects:labelItem, flexibleSpaceItem, switchItem, nil];
     
     self.disableIdleTimerSwitch = disableIdleTimerSwitch;
+}
+
+- (void)updateToolbarStatusAnimated:(BOOL)animated
+{
+    BOOL idleTimerDisabled = [[UIApplication sharedApplication] isIdleTimerDisabled];
+    [self.disableIdleTimerSwitch setOn:idleTimerDisabled animated:animated];
+    
+    BOOL shouldHideToolbar = ([[DocSetDownloadManager sharedDownloadManager] currentDownload] == nil);
+    [self.navigationController setToolbarHidden:shouldHideToolbar animated:animated];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -82,6 +96,11 @@
 
 - (void)disableIdleTimerSwitchToggled:(id)sender
 {
+}
+
+- (void)idleTimerToggled:(NSNotification *)notification
+{
+    [self updateToolbarStatusAnimated:YES];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView

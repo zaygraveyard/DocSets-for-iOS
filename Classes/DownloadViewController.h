@@ -15,6 +15,7 @@
 @property (nonatomic, weak) UISwitch *disableIdleTimerSwitch;
 
 - (void)setupToolbar;
+- (void)updateToolbarStatusAnimated:(BOOL)animated;
 
 @end
 
