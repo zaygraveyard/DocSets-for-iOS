@@ -42,15 +42,21 @@
 
 - (void)setupToolbar
 {
-    NSString *deviceName = [[UIDevice currentDevice] localizedModel];
     UILabel *disableIdleTimerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-    disableIdleTimerLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Prevent %@ from going to sleep during download", nil), deviceName];
     disableIdleTimerLabel.backgroundColor = [UIColor clearColor];
     disableIdleTimerLabel.opaque = NO;
     disableIdleTimerLabel.font = [UIFont systemFontOfSize:15.0f];
-    disableIdleTimerLabel.textColor = [UIColor darkGrayColor];
-    disableIdleTimerLabel.shadowColor = [UIColor whiteColor];
     disableIdleTimerLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        disableIdleTimerLabel.text = NSLocalizedString(@"Prevent sleep during download", nil);
+        disableIdleTimerLabel.textColor = [UIColor whiteColor];
+        disableIdleTimerLabel.shadowColor = [UIColor darkGrayColor];
+    } else {
+        NSString *deviceName = [[UIDevice currentDevice] localizedModel];
+        disableIdleTimerLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Prevent %@ from going to sleep during download", nil), deviceName];
+        disableIdleTimerLabel.textColor = [UIColor darkGrayColor];
+        disableIdleTimerLabel.shadowColor = [UIColor whiteColor];
+    }
     [disableIdleTimerLabel sizeToFit];
 
     UISwitch *disableIdleTimerSwitch = [[UISwitch alloc] init];
