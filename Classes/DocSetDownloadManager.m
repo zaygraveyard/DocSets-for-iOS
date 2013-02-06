@@ -23,7 +23,7 @@
 
 @implementation DocSetDownloadManager
 
-@synthesize downloadedDocSets=_downloadedDocSets, downloadedDocSetNames=_downloadedDocSetNames, availableDownloads=_availableDownloads, currentDownload=_currentDownload, lastUpdated=_lastUpdated;
+@synthesize downloadedDocSets=_downloadedDocSets, downloadedDocSetNames=_downloadedDocSetNames, availableDownloads=_availableDownloads, currentDownload=_currentDownload, lastUpdated=_lastUpdated, neverDisableIdleTimer = _neverDisableIdleTimer;
 
 - (id)init
 {
@@ -221,12 +221,18 @@
 - (void)toggleIdleTimerIfNeeded
 {
     BOOL shouldDisableIdleTimer = NO;
-    if (self.currentDownload) {
+    if (self.currentDownload && !self.neverDisableIdleTimer) {
         shouldDisableIdleTimer = YES;
     }
     
     [[UIApplication sharedApplication] setIdleTimerDisabled:shouldDisableIdleTimer];
     [[NSNotificationCenter defaultCenter] postNotificationName:DocSetDownloadManagerIdleTimerToggledNotification object:self];
+}
+
+- (void)setNeverDisableIdleTimer:(BOOL)neverDisableIdleTimer
+{
+    _neverDisableIdleTimer = neverDisableIdleTimer;
+    [self toggleIdleTimerIfNeeded];
 }
 
 @end

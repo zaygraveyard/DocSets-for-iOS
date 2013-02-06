@@ -96,6 +96,7 @@
 
 - (void)disableIdleTimerSwitchToggled:(id)sender
 {
+    [[DocSetDownloadManager sharedDownloadManager] setNeverDisableIdleTimer:!self.disableIdleTimerSwitch.on];
 }
 
 - (void)idleTimerToggled:(NSNotification *)notification

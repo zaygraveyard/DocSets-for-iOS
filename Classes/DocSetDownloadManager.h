@@ -28,6 +28,8 @@
 	
 	NSDate *_lastUpdated;
 	BOOL _updatingAvailableDocSetsFromWeb;
+    
+    BOOL _neverDisableIdleTimer;
 }
 
 @property (nonatomic, strong) NSArray *downloadedDocSets;
@@ -35,6 +37,7 @@
 @property (nonatomic, strong) NSArray *availableDownloads;
 @property (nonatomic, strong) DocSetDownload *currentDownload;
 @property (nonatomic, strong) NSDate *lastUpdated;
+@property (nonatomic, assign) BOOL neverDisableIdleTimer;
 
 + (id)sharedDownloadManager;
 - (void)reloadAvailableDocSets;
