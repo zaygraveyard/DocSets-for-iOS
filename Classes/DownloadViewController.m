@@ -42,15 +42,24 @@
 
 - (void)setupToolbar
 {
-    UILabel *disableIdleTimerLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 300.0, 30.0f)];
-    disableIdleTimerLabel.text = NSLocalizedString(@"Disable Idle Timer During Download", nil);
+    NSString *deviceName = [[UIDevice currentDevice] localizedModel];
+    UILabel *disableIdleTimerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    disableIdleTimerLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Prevent %@ from going to sleep during download", nil), deviceName];
+    disableIdleTimerLabel.backgroundColor = [UIColor clearColor];
+    disableIdleTimerLabel.opaque = NO;
+    disableIdleTimerLabel.font = [UIFont systemFontOfSize:15.0f];
+    disableIdleTimerLabel.textColor = [UIColor darkGrayColor];
+    disableIdleTimerLabel.shadowColor = [UIColor whiteColor];
+    disableIdleTimerLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
+    [disableIdleTimerLabel sizeToFit];
+
     UISwitch *disableIdleTimerSwitch = [[UISwitch alloc] init];
     [disableIdleTimerSwitch addTarget:self action:@selector(disableIdleTimerSwitchToggled:) forControlEvents:UIControlEventValueChanged];
     
     UIBarButtonItem *labelItem = [[UIBarButtonItem alloc] initWithCustomView:disableIdleTimerLabel];
     UIBarButtonItem *flexibleSpaceItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     UIBarButtonItem *switchItem = [[UIBarButtonItem alloc] initWithCustomView:disableIdleTimerSwitch];
-    self.toolbarItems = [NSArray arrayWithObjects:labelItem, flexibleSpaceItem, switchItem, nil];
+    self.toolbarItems = [NSArray arrayWithObjects:flexibleSpaceItem, labelItem, switchItem, nil];
     
     self.disableIdleTimerSwitch = disableIdleTimerSwitch;
 }
