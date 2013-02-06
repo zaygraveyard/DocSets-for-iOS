@@ -11,6 +11,7 @@
 #define DocSetDownloadManagerAvailableDocSetsChangedNotification	@"DocSetDownloadManagerAvailableDocSetsChangedNotification"
 #define DocSetDownloadManagerStartedDownloadNotification			@"DocSetDownloadManagerStartedDownloadNotification"
 #define DocSetDownloadManagerUpdatedDocSetsNotification				@"DocSetDownloadManagerUpdatedDocSetsNotification"
+#define DocSetDownloadManagerIdleTimerToggledNotification           @"DocSetDownloadManagerIdleTimerToggledNotification"
 #define DocSetDownloadFinishedNotification							@"DocSetDownloadFinishedNotification"
 
 @class DocSet, DocSetDownload;
