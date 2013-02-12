@@ -1,73 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>DocSets</key>
-	<array>
-		<dict>
-			<key>title</key>
-			<string>iOS 6.0 Library</string>
-			<key>name</key>
-			<string>com.apple.adc.documentation.AppleiOS6.0.iOSLibrary.docset</string>
-			<key>URL</key>
-			<string>https://devimages.apple.com.edgekey.net/docsets/20120919/com.apple.adc.documentation.AppleiOS6.0.iOSLibrary.xar</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>iOS 5.1 Library</string>
-			<key>name</key>
-			<string>com.apple.adc.documentation.AppleiOS5_1.iOSLibrary.docset</string>
-			<key>URL</key>
-			<string>http://devimages.apple.com/docsets/20120307/com.apple.adc.documentation.AppleiOS5_1.iOSLibrary.xar</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>iOS 5.0 Library</string>
-			<key>name</key>
-			<string>com.apple.adc.documentation.AppleiOS5_0.iOSLibrary.docset</string>
-			<key>URL</key>
-			<string>http://devimages.apple.com/docsets/20120109/com.apple.adc.documentation.AppleiOS5_0.iOSLibrary.xar</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>iOS 4.3 Library</string>
-			<key>name</key>
-			<string>com.apple.adc.documentation.AppleiOS4_3.iOSLibrary.docset</string>
-			<key>URL</key>
-			<string>http://devimages.apple.com/docsets/20110720/com.apple.adc.documentation.AppleiOS4_3.iOSLibrary.xar</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>iOS 4.2 Library</string>
-			<key>name</key>
-			<string>com.apple.adc.documentation.AppleiOS4_2.iOSLibrary.docset</string>
-			<key>URL</key>
-			<string>http://devimages.apple.com/docsets/20101122/com.apple.adc.documentation.AppleiOS4_2.iOSLibrary.Xcode4.xar</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>OS X 10.8 Core Library</string>
-			<key>name</key>
-			<string>com.apple.adc.documentation.AppleOSX10_8.CoreReference.docset</string>
-			<key>URL</key>
-			<string>https://devimages.apple.com.edgekey.net/docsets/20120725/com.apple.adc.documentation.AppleOSX10_8.CoreReference.xar</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>Mac OS X 10.7 Core Library</string>
-			<key>name</key>
-			<string>com.apple.adc.documentation.AppleLion.CoreReference.docset</string>
-			<key>URL</key>
-			<string>http://devimages.apple.com/docsets/20120109/com.apple.adc.documentation.AppleLion.CoreReference.xar</string>
-		</dict>
-		<dict>
-			<key>title</key>
-			<string>Mac OS X 10.6 Core Library</string>
-			<key>name</key>
-			<string>com.apple.adc.documentation.AppleSnowLeopard.CoreReference.docset</string>
-			<key>URL</key>
-			<string>http://devimages.apple.com/docsets/20110621/com.apple.adc.documentation.AppleSnowLeopard.CoreReference.xar</string>
-		</dict>
-	</array>
-</dict>
+    <dict>
+        <key>DocSets</key>
+        <array>
+            <dict>
+                <key>title</key>
+                <string>iOS 6.1 Library</string>
+                <key>name</key>
+                <string>com.apple.adc.documentation.AppleiOS6.1.iOSLibrary.docset</string>
+                <key>URL</key>
+                <string>http://devimages.apple.com/docsets/20130130/com.apple.adc.documentation.AppleiOS6.1.iOSLibrary.xar</string>
+            </dict>
+            <dict>
+                <key>title</key>
+                <string>iOS 6.0 Library</string>
+                <key>name</key>
+                <string>com.apple.adc.documentation.AppleiOS6.0.iOSLibrary.docset</string>
+                <key>URL</key>
+                <string>https://devimages.apple.com.edgekey.net/docsets/20120919/com.apple.adc.documentation.AppleiOS6.0.iOSLibrary.xar</string>
+            </dict>
+            <dict>
+                <key>title</key>
+                <string>iOS 5.1 Library</string>
+                <key>name</key>
+                <string>com.apple.adc.documentation.AppleiOS5_1.iOSLibrary.docset</string>
+                <key>URL</key>
+                <string>http://devimages.apple.com/docsets/20120307/com.apple.adc.documentation.AppleiOS5_1.iOSLibrary.xar</string>
+            </dict>
+            <dict>
+                <key>title</key>
+                <string>iOS 5.0 Library</string>
+                <key>name</key>
+                <string>com.apple.adc.documentation.AppleiOS5_0.iOSLibrary.docset</string>
+                <key>URL</key>
+                <string>http://devimages.apple.com/docsets/20120109/com.apple.adc.documentation.AppleiOS5_0.iOSLibrary.xar</string>
+            </dict>
+            <dict>
+                <key>title</key>
+                <string>iOS 4.3 Library</string>
+                <key>name</key>
+                <string>com.apple.adc.documentation.AppleiOS4_3.iOSLibrary.docset</string>
+                <key>URL</key>
+                <string>http://devimages.apple.com/docsets/20110720/com.apple.adc.documentation.AppleiOS4_3.iOSLibrary.xar</string>
+            </dict>
+            <dict>
+                <key>title</key>
+                <string>iOS 4.2 Library</string>
+                <key>name</key>
+                <string>com.apple.adc.documentation.AppleiOS4_2.iOSLibrary.docset</string>
+                <key>URL</key>
+                <string>http://devimages.apple.com/docsets/20101122/com.apple.adc.documentation.AppleiOS4_2.iOSLibrary.Xcode4.xar</string>
+            </dict>
+            <dict>
+                <key>title</key>
+                <string>OS X 10.8 Core Library</string>
+                <key>name</key>
+                <string>com.apple.adc.documentation.AppleOSX10_8.CoreReference.docset</string>
+                <key>URL</key>
+                <string>https://devimages.apple.com.edgekey.net/docsets/20120725/com.apple.adc.documentation.AppleOSX10_8.CoreReference.xar</string>
+            </dict>
+            <dict>
+                <key>title</key>
+                <string>Mac OS X 10.7 Core Library</string>
+                <key>name</key>
+                <string>com.apple.adc.documentation.AppleLion.CoreReference.docset</string>
+                <key>URL</key>
+                <string>http://devimages.apple.com/docsets/20120109/com.apple.adc.documentation.AppleLion.CoreReference.xar</string>
+            </dict>
+            <dict>
+                <key>title</key>
+                <string>Mac OS X 10.6 Core Library</string>
+                <key>name</key>
+                <string>com.apple.adc.documentation.AppleSnowLeopard.CoreReference.docset</string>
+                <key>URL</key>
+                <string>http://devimages.apple.com/docsets/20110621/com.apple.adc.documentation.AppleSnowLeopard.CoreReference.xar</string>
+            </dict>
+        </array>
+    </dict>
 </plist>
