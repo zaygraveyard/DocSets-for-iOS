@@ -16,7 +16,9 @@
 
 @implementation BookmarksViewController
 
-@synthesize syncInfoButtonItem=_syncInfoButtonItem;
+@synthesize syncInfoButtonItem = _syncInfoButtonItem;
+@synthesize syncInfoTitleItem = _syncInfoTitleItem;
+@synthesize syncTitleLabel = _syncTitleLabel;
 @synthesize delegate=_delegate;
 
 - (id)initWithDocSet:(DocSet *)selectedDocSet
@@ -30,22 +32,34 @@
 			self.contentSizeForViewInPopover = CGSizeMake(320, 480);
 		}
 		
+        self.navigationItem.leftBarButtonItem = self.editButtonItem;
+        
+        self.syncTitleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0.0, 0.0, 220.0, 29.0)];
+        self.syncTitleLabel.textColor = [UIColor whiteColor];
+        self.syncTitleLabel.font = [UIFont systemFontOfSize:12.0];
+        self.syncTitleLabel.backgroundColor = [UIColor clearColor];
+        self.syncInfoTitleItem = [[UIBarButtonItem alloc] initWithCustomView:self.syncTitleLabel];
+        
+        UIBarButtonItem *flexSpace1 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        UIBarButtonItem *flexSpace2 = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
 		UIBarButtonItem *shareItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(shareBookmarks:)];
-		UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-		self.toolbarItems = [NSArray arrayWithObjects:[self editButtonItem], flexSpace, shareItem, nil];
-		
+		self.toolbarItems = [NSArray arrayWithObjects:flexSpace1, flexSpace2, shareItem, nil];
+        
 		docSet = selectedDocSet;
 		
 		UIButton *cloudButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[cloudButton setImage:[UIImage imageNamed:@"CloudLog.png"] forState:UIControlStateNormal];
 		cloudButton.showsTouchWhenHighlighted = YES;
 		cloudButton.frame = CGRectMake(0, 0, 29, 29);
-		[cloudButton addTarget:self action:@selector(showSyncLog:) forControlEvents:UIControlEventTouchUpInside];
+		[cloudButton addTarget:self action:@selector(showBookmarkSyncLogViewController) forControlEvents:UIControlEventTouchUpInside];
 		self.syncInfoButtonItem = [[UIBarButtonItem alloc] initWithCustomView:cloudButton];
 		
 		[[BookmarksManager sharedBookmarksManager] addObserver:self forKeyPath:@"iCloudEnabled" options:NSKeyValueObservingOptionNew context:nil];
 		[self showOrHideSyncLogButton];
 		
+        if ([[BookmarksManager sharedBookmarksManager] iCloudEnabled])
+            [self updateSyncState];
+        
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(bookmarksDidUpdate:) name:BookmarksManagerDidLoadBookmarksNotification object:nil];
 	}
 	return self;
@@ -60,32 +74,44 @@
 {
 	BOOL iCloudEnabled = [[BookmarksManager sharedBookmarksManager] iCloudEnabled];
 	if (iCloudEnabled) {
-		self.navigationItem.leftBarButtonItem = self.syncInfoButtonItem;
+		NSMutableArray *items = self.toolbarItems.mutableCopy;
+        if (![items containsObject:self.syncInfoButtonItem])
+            [items insertObject:self.syncInfoButtonItem atIndex:0];
+        if (![items containsObject:self.syncInfoTitleItem])
+            [items insertObject:self.syncInfoTitleItem atIndex:2];
+        self.toolbarItems = items;
 	} else {
-		self.navigationItem.leftBarButtonItem = nil;
+		NSMutableArray *items = self.toolbarItems.mutableCopy;
+        [items removeObject:self.syncInfoButtonItem];
+        [items removeObject:self.syncInfoTitleItem];
+        self.toolbarItems = items;
 	}
 }
 
-- (void)showSyncLog:(id)sender
+- (void)updateSyncState
 {
-	NSString *deviceName = [[BookmarksManager sharedBookmarksManager] lastSavedDeviceName];
-	if (!deviceName) deviceName = NSLocalizedString(@"Unknown Device", nil);
 	NSDate *modifiedDate = [[BookmarksManager sharedBookmarksManager] bookmarksModificationDate];
-	NSString *modifiedDateString = [NSDateFormatter localizedStringFromDate:modifiedDate dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
-	NSString *shortSyncStatus = [NSString stringWithFormat:NSLocalizedString(@"Your bookmarks are synced with iCloud.\n\nLast modified by %@ (%@)", nil), deviceName, modifiedDateString];
-	UIAlertView *statusAlert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"iCloud Sync Status", nil) message:shortSyncStatus delegate:self cancelButtonTitle:NSLocalizedString(@"OK", nil) otherButtonTitles:NSLocalizedString(@"Show Log...", nil), nil];
-	statusAlert.tag = SYNC_STATUS_ALERT_TAG;
-	[statusAlert show];
+    
+    if (modifiedDate) {
+        NSString *modifiedDateString = [NSDateFormatter localizedStringFromDate:modifiedDate dateStyle:NSDateFormatterMediumStyle timeStyle:NSDateFormatterShortStyle];
+        NSString *shortSyncStatus = [NSString stringWithFormat:NSLocalizedString(@"Last modified: %@", nil), modifiedDateString];
+        self.syncTitleLabel.text = shortSyncStatus;
+    }
+}
+
+- (void)showBookmarkSyncLogViewController
+{
+    BookmarkSyncLogViewController *vc = [[BookmarkSyncLogViewController alloc] initWithStyle:UITableViewStylePlain];
+    vc.title = NSLocalizedString(@"iCloud Sync Log", nil);
+    vc.contentSizeForViewInPopover = self.contentSizeForViewInPopover;
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 - (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
 {
 	if (alertView.tag == SYNC_STATUS_ALERT_TAG) {
 		if (buttonIndex != alertView.cancelButtonIndex) {
-			BookmarkSyncLogViewController *vc = [[BookmarkSyncLogViewController alloc] initWithStyle:UITableViewStylePlain];
-			vc.title = NSLocalizedString(@"iCloud Sync Log", nil);
-			vc.contentSizeForViewInPopover = self.contentSizeForViewInPopover;
-			[self.navigationController pushViewController:vc animated:YES];
+			[self showBookmarkSyncLogViewController];
 		}
 	}
 }
@@ -93,10 +119,10 @@
 - (void)shareBookmarks:(id)sender
 {
 	if (![MFMailComposeViewController canSendMail]) {
-		[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Send Mail", nil) 
-									message:NSLocalizedString(@"Your device is not configured for sending email. Please use the Settings app to set up an email account.", nil) 
-								   delegate:nil 
-						  cancelButtonTitle:NSLocalizedString(@"OK", nil) 
+		[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Cannot Send Mail", nil)
+									message:NSLocalizedString(@"Your device is not configured for sending email. Please use the Settings app to set up an email account.", nil)
+								   delegate:nil
+						  cancelButtonTitle:NSLocalizedString(@"OK", nil)
 						  otherButtonTitles:nil] show];
 		return;
 	}
@@ -126,6 +152,7 @@
 - (void)bookmarksDidUpdate:(NSNotification *)notification
 {
 	[self.tableView reloadData];
+    [self updateSyncState];
 }
 
 - (void)viewDidLoad
@@ -193,10 +220,10 @@
 		if ([[BookmarksManager sharedBookmarksManager] deleteBookmarkAtIndex:indexPath.row fromDocSet:docSet]) {
 			[tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
 		} else {
-			[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil) 
-										message:NSLocalizedString(@"Bookmarks are currently being synced. Please try again in a moment.", nil) 
-									   delegate:nil 
-							  cancelButtonTitle:NSLocalizedString(@"OK", nil) 
+			[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil)
+										message:NSLocalizedString(@"Bookmarks are currently being synced. Please try again in a moment.", nil)
+									   delegate:nil
+							  cancelButtonTitle:NSLocalizedString(@"OK", nil)
 							  otherButtonTitles:nil] show];
 		}
 	}

@@ -25,6 +25,8 @@
 
 @property (nonatomic, weak) id <BookmarksViewControllerDelegate> delegate;
 @property (nonatomic, retain) UIBarButtonItem *syncInfoButtonItem;
+@property (nonatomic, retain) UIBarButtonItem *syncInfoTitleItem;
+@property (nonatomic, retain) UILabel *syncTitleLabel;
 
 - (id)initWithDocSet:(DocSet *)selectedDocSet;
 

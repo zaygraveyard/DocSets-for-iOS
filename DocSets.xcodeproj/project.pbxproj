@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		153F47CA1604C7B600C707CD /* NSFileManager+DocSetsAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 153F47C91604C7B600C707CD /* NSFileManager+DocSetsAdditions.m */; };
 		1D3623260D0F684500981E51 /* DocSetsAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* DocSetsAppDelegate.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
@@ -127,6 +128,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		153F47C81604C7B600C707CD /* NSFileManager+DocSetsAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+DocSetsAdditions.h"; sourceTree = "<group>"; };
+		153F47C91604C7B600C707CD /* NSFileManager+DocSetsAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+DocSetsAdditions.m"; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* DocSetsAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocSetsAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* DocSetsAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DocSetsAppDelegate.m; sourceTree = "<group>"; };
@@ -457,6 +460,8 @@
 			children = (
 				7FDB349D1540D38800A4AF5F /* NSString+RelativePath.h */,
 				7FDB349E1540D38900A4AF5F /* NSString+RelativePath.m */,
+				153F47C81604C7B600C707CD /* NSFileManager+DocSetsAdditions.h */,
+				153F47C91604C7B600C707CD /* NSFileManager+DocSetsAdditions.m */,
 				7FF706C812ABE88A001FF09F /* DocSet.h */,
 				7FF706C912ABE88A001FF09F /* DocSet.m */,
 				7FACA8EB14CC371C00BADCC8 /* DocSetDownloadManager.h */,
@@ -776,6 +781,7 @@
 				7FDB349F1540D38900A4AF5F /* NSString+RelativePath.m in Sources */,
 				7FEFBF2C156B619D00C75316 /* BookmarksManager.m in Sources */,
 				7FEFBF35156D328200C75316 /* BookmarkSyncLogViewController.m in Sources */,
+				153F47CA1604C7B600C707CD /* NSFileManager+DocSetsAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
