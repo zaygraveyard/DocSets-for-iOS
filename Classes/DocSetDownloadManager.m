@@ -23,7 +23,7 @@
 
 @implementation DocSetDownloadManager
 
-@synthesize downloadedDocSets=_downloadedDocSets, downloadedDocSetNames=_downloadedDocSetNames, availableDownloads=_availableDownloads, currentDownload=_currentDownload, lastUpdated=_lastUpdated;
+@synthesize downloadedDocSets=_downloadedDocSets, downloadedDocSetNames=_downloadedDocSetNames, availableDownloads=_availableDownloads, currentDownload=_currentDownload, lastUpdated=_lastUpdated, neverDisableIdleTimer = _neverDisableIdleTimer;
 
 - (id)init
 {
@@ -128,6 +128,7 @@
 	} else if (download.status == DocSetDownloadStatusExtracting) {
 		download.shouldCancelExtracting = YES;
 	}
+    [self toggleIdleTimerIfNeeded];
 }
 
 - (void)downloadDocSetAtURL:(NSString *)URL
@@ -144,6 +145,7 @@
 	[[NSNotificationCenter defaultCenter] postNotificationName:DocSetDownloadManagerStartedDownloadNotification object:self];
 	
 	[self startNextDownload];
+    [self toggleIdleTimerIfNeeded];
 }
 
 - (void)deleteDocSet:(DocSet *)docSetToDelete
@@ -198,6 +200,7 @@
 	[_downloadsByURL removeObjectForKey:[download.URL absoluteString]];	
 	self.currentDownload = nil;
 	[self startNextDownload];
+    [self toggleIdleTimerIfNeeded];
 }
 
 - (void)downloadFailed:(DocSetDownload *)download
@@ -206,12 +209,30 @@
 	[_downloadsByURL removeObjectForKey:[download.URL absoluteString]];	
 	self.currentDownload = nil;
 	[self startNextDownload];
+    [self toggleIdleTimerIfNeeded];
 	
 	[[[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Download Failed", nil) 
 								 message:NSLocalizedString(@"An error occured while trying to download the DocSet.", nil) 
 								delegate:nil 
 					   cancelButtonTitle:NSLocalizedString(@"OK", nil) 
 					   otherButtonTitles:nil] show];
+}
+
+- (void)toggleIdleTimerIfNeeded
+{
+    BOOL shouldDisableIdleTimer = NO;
+    if (self.currentDownload && !self.neverDisableIdleTimer) {
+        shouldDisableIdleTimer = YES;
+    }
+    
+    [[UIApplication sharedApplication] setIdleTimerDisabled:shouldDisableIdleTimer];
+    [[NSNotificationCenter defaultCenter] postNotificationName:DocSetDownloadManagerIdleTimerToggledNotification object:self];
+}
+
+- (void)setNeverDisableIdleTimer:(BOOL)neverDisableIdleTimer
+{
+    _neverDisableIdleTimer = neverDisableIdleTimer;
+    [self toggleIdleTimerIfNeeded];
 }
 
 @end

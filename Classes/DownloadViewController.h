@@ -9,8 +9,13 @@
 #import <UIKit/UIKit.h>
 
 @interface DownloadViewController : UITableViewController {
-	
+	UISwitch * __weak _disableIdleTimerSwitch;
 }
+
+@property (nonatomic, weak) UISwitch *disableIdleTimerSwitch;
+
+- (void)setupToolbar;
+- (void)updateToolbarStatusAnimated:(BOOL)animated;
 
 @end
 

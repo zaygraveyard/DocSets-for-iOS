@@ -11,6 +11,8 @@
 
 @implementation DownloadViewController
 
+@synthesize disableIdleTimerSwitch = _disableIdleTimerSwitch;
+
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
@@ -18,6 +20,7 @@
 		self.title = NSLocalizedString(@"Download", nil);
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(docSetsChanged:) name:DocSetDownloadManagerUpdatedDocSetsNotification object:nil];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(availableDocSetsChanged:) name:DocSetDownloadManagerAvailableDocSetsChangedNotification object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(idleTimerToggled:) name:DocSetDownloadManagerIdleTimerToggledNotification object:nil];
     }
     return self;
 }
@@ -28,6 +31,53 @@
 	self.tableView.rowHeight = 64.0;
 	self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done:)];
 	self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(updateAvailableDocSetsFromWeb:)];
+    
+    [self setupToolbar];
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [self updateToolbarStatusAnimated:NO];
+}
+
+- (void)setupToolbar
+{
+    UILabel *disableIdleTimerLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    disableIdleTimerLabel.backgroundColor = [UIColor clearColor];
+    disableIdleTimerLabel.opaque = NO;
+    disableIdleTimerLabel.font = [UIFont systemFontOfSize:15.0f];
+    disableIdleTimerLabel.shadowOffset = CGSizeMake(0.0f, 1.0f);
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        disableIdleTimerLabel.text = NSLocalizedString(@"Prevent sleep during download", nil);
+        disableIdleTimerLabel.textColor = [UIColor whiteColor];
+        disableIdleTimerLabel.shadowColor = [UIColor darkGrayColor];
+    } else {
+        NSString *deviceName = [[UIDevice currentDevice] localizedModel];
+        disableIdleTimerLabel.text = [NSString stringWithFormat:NSLocalizedString(@"Prevent %@ from going to sleep during download", nil), deviceName];
+        disableIdleTimerLabel.textColor = [UIColor darkGrayColor];
+        disableIdleTimerLabel.shadowColor = [UIColor whiteColor];
+    }
+    [disableIdleTimerLabel sizeToFit];
+
+    UISwitch *disableIdleTimerSwitch = [[UISwitch alloc] init];
+    [disableIdleTimerSwitch addTarget:self action:@selector(disableIdleTimerSwitchToggled:) forControlEvents:UIControlEventValueChanged];
+    
+    UIBarButtonItem *labelItem = [[UIBarButtonItem alloc] initWithCustomView:disableIdleTimerLabel];
+    UIBarButtonItem *flexibleSpaceItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+    UIBarButtonItem *switchItem = [[UIBarButtonItem alloc] initWithCustomView:disableIdleTimerSwitch];
+    self.toolbarItems = [NSArray arrayWithObjects:flexibleSpaceItem, labelItem, switchItem, nil];
+    
+    self.disableIdleTimerSwitch = disableIdleTimerSwitch;
+}
+
+- (void)updateToolbarStatusAnimated:(BOOL)animated
+{
+    BOOL shouldHideToolbar = ([[DocSetDownloadManager sharedDownloadManager] currentDownload] == nil);
+	if (!shouldHideToolbar) {
+		BOOL idleTimerDisabled = [[UIApplication sharedApplication] isIdleTimerDisabled];
+		[self.disableIdleTimerSwitch setOn:idleTimerDisabled animated:NO];
+	}
+	[self.navigationController setToolbarHidden:shouldHideToolbar animated:animated];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -58,6 +108,16 @@
 - (void)done:(id)sender
 {
 	[self dismissModalViewControllerAnimated:YES];
+}
+
+- (void)disableIdleTimerSwitchToggled:(id)sender
+{
+    [[DocSetDownloadManager sharedDownloadManager] setNeverDisableIdleTimer:!self.disableIdleTimerSwitch.on];
+}
+
+- (void)idleTimerToggled:(NSNotification *)notification
+{
+    [self updateToolbarStatusAnimated:YES];
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
